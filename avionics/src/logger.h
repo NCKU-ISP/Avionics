@@ -12,12 +12,14 @@
 #define _LOGGER_H
 
 #include "Arduino.h"
+#include "configs.h"
 #include <SPI.h>
 #include <SD.h>
 
+enum LOG_LEVEL{LEVEL_DEBUG, LEVEL_INFO, LEVEL_WARNING, LEVEL_ERROR};
+
 class Logger{
 private:
-    File sd;
     String file_ext;
 public:
     Logger();
@@ -28,7 +30,7 @@ public:
     bool init();
 
     /* Perform logging task */
-    bool log();
+    bool log(String msg, LOG_LEVEL level=LEVEL_DEBUG);
 };
 
 #endif

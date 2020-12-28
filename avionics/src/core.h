@@ -10,19 +10,34 @@
 #ifndef _CORE_H
 #define _CORE_H
 
+
 #include "configs.h"
 #include "Arduino.h"
 #include "sensors.h"
 #include "logger.h"
 
 enum SYSTEM_STATE{SYSTEM_UP=0, SYSTEM_READY, SYSTEM_ERROR};
+enum SPI_MASTER{SPI_NONE, SPI_SD, SPI_COMMUNICATION};
+
+#define TIMER_PRESCALER_1    0x01
+#define TIMER_PRESCALER_8    0x02
+#define TIMER_PRESCALER_32   0x03
+#define TIMER_PRESCALER_64   0x04
+#define TIMER_PRESCALER_128  0x05
+#define TIMER_PRESCALER_256  0x06
+#define TIMER_PRESCALER_1024 0x07
+
+#ifdef USE_DUAL_SYSTEM_WATCHDOG
 enum WATCHDOG_STATE{WATCHDOG_OK=0, WATCHDOG_TIMEOUT};
+#endif
 
 class System{
 private:
     unsigned long last_update_time;
+    volatile SPI_MASTER sd_master;
+
 public:
-    static SYSTEM_STATE state;
+    SYSTEM_STATE state;
     IMU imu;
     Logger logger;
 
@@ -35,7 +50,9 @@ public:
     SYSTEM_STATE init();
 
     /* Check if the partner mcu report normal */
+    #ifdef USE_DUAL_SYSTEM_WATCHDOG
     WATCHDOG_STATE check_partner_state();
+    #endif
 
     void buzzer(bool beep);
 };
