@@ -19,11 +19,17 @@ void loop()
         sys.buzzer(BUZ_LEVEL0);
         sys.logger.log("Rising");
     } else if (sys.imu.pose == ROCKET_FALLING) {
+        sys.parachute(SERVO_RELEASE_ANGLE);
         sys.buzzer(BUZ_LEVEL1);
         sys.logger.log("Falling");
     }
-    sys.logger.log(String(sys.imu.altitude));
-    delay(100);
+
+    // Continuous logging
+    static auto last_log_time = millis();
+    if (millis() - last_log_time > LOGGER_LOG_INTERVAL) {
+        sys.logger.log(String(sys.imu.altitude));
+        last_log_time = millis();
+    }
 }
 
 void ISR_enable()
