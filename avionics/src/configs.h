@@ -3,7 +3,7 @@
 
 /*--------------- System function enable ---------------*/
 //#define USE_DUAL_SYSTEM_WATCHDOG
-#define USE_PERIPHERAL_SD_CARD
+//#define USE_PERIPHERAL_SD_CARD
 #define USE_PERIPHERAL_BMP280
 //#define USE_PERIPHERAL_MPU6050
 #define USE_SERIAL_DEBUGGER
@@ -21,6 +21,8 @@
 
 // Signal
 #define PIN_BUZZER 2
+#define PIN_TRIGGER 6
+#define PIN_MOTOR 9
 
 /*------------------ Constants for imu ------------------*/
 #ifdef USE_PERIPHERAL_MPU6050
@@ -47,9 +49,9 @@
 #endif
 // Altitude setting
 // tau = (-T) / log(a), with a=0.8 and T=10(ms), tau about to 103.2 (ms)
-#define IMU_ALTITUDE_SMOOTHING_CONSTANT 0.8f
-#define IMU_RISING_CRITERIA 5
-#define IMU_FALLING_CRITERIA 5
+#define IMU_ALTITUDE_SMOOTHING_CONSTANT 0.0f
+#define IMU_RISING_CRITERIA 10.0f
+#define IMU_FALLING_CRITERIA -10.0f
 
 /*---------------------- Data logger --------------------*/
 #ifdef USE_PERIPHERAL_SD_CARD

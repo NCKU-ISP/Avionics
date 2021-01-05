@@ -17,6 +17,7 @@ double IMU::sea_level_pressure = 0;
 IMU::IMU()
 {
     state = IMU_ERROR;
+    pose = ROCKET_UNKNOWN;
 
 #ifdef USE_PERIPHERAL_MPU6050
     // Failed to initialize MPU9250
@@ -44,10 +45,17 @@ IMU::IMU()
     attachInterrupt(PIN_IMU_INT, imu_isr_update, RISING);
 #endif
 
+    state = IMU_OK;
+}
+
+IMU_STATE IMU::init()
+{
+    state = IMU_ERROR;
+
 #ifdef USE_PERIPHERAL_BMP280
     /* BMP 280 settings */
     if (!bmp.begin(BMP280_ADDRESS_ALT, BMP280_CHIPID))
-        return;
+        return state;
 
     bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,  /* Operating Mode. */
                     Adafruit_BMP280::SAMPLING_X2,  /* Temp. oversampling */
@@ -55,13 +63,6 @@ IMU::IMU()
                     Adafruit_BMP280::FILTER_X16,   /* Filtering. */
                     Adafruit_BMP280::STANDBY_MS_500); /* Standby time. (ms) */
 #endif
-
-    state = IMU_OK;
-}
-
-IMU_STATE IMU::init()
-{
-    state = IMU_ERROR;
 
 #ifdef USE_MPU_ISP_INTERFACE
     // Chip select pin for MPU9250
@@ -78,7 +79,8 @@ IMU_STATE IMU::init()
         delay(20);
     }
     // Assuming the initializing altitude is sea level
-    seaLevelHpa = p / IMU_BMP_SEA_LEVEL_PRESSURE_SAMPLING;
+    // unit from pa to hpa
+    seaLevelHpa = p / IMU_BMP_SEA_LEVEL_PRESSURE_SAMPLING / 100;
 // temper = t / IMU_BMP_SEA_LEVEL_PRESSURE_SAMPLING;
 #endif
 
@@ -122,6 +124,7 @@ float IMU::altitude_filter(float v)
 void IMU::bmp_update()
 {
     altitude = altitude_filter(bmp.readAltitude(seaLevelHpa));
+
     static float lastAltitude = altitude;
 
     // times 1000 because unit changes from ms to s
@@ -133,7 +136,11 @@ void IMU::bmp_update()
 
     if (derivative > IMU_RISING_CRITERIA) {
         // Rocket rising
+        pose = ROCKET_RISING;
     } else if (derivative < IMU_FALLING_CRITERIA) {
         // Rocket falling
+        pose = ROCKET_FALLING;
+    } else {
+        pose = ROCKET_UNKNOWN;
     }
 }

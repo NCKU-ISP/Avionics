@@ -17,6 +17,7 @@
 #include <Adafruit_BMP280.h>
 
 enum IMU_STATE { IMU_RESET, IMU_OK, IMU_ERROR };
+enum ROCKET_POSE { ROCKET_UNKNOWN, ROCKET_RISING, ROCKET_FALLING };
 
 #ifdef USE_PERIPHERAL_MPU6050
 typedef struct {
@@ -63,6 +64,8 @@ public:
     float altitude;  // Altitude
 
     float seaLevelHpa;
+
+    ROCKET_POSE pose;
 
     /* IMU should be connected on the master I2C interface, this
      * function sets up all static parameters such as range
