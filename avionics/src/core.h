@@ -17,6 +17,7 @@
 
 enum SYSTEM_STATE { SYSTEM_UP = 0, SYSTEM_READY, SYSTEM_ERROR };
 enum SPI_MASTER { SPI_NONE, SPI_SD, SPI_COMMUNICATION };
+enum BUZZER_LEVEL { BUZ_LEVEL0, BUZ_LEVEL1, BUZ_LEVEL2, BUZ_LEVEL3 };
 
 #define TIMER_PRESCALER_1 0x01
 #define TIMER_PRESCALER_8 0x02
@@ -54,7 +55,8 @@ public:
     WATCHDOG_STATE check_partner_state();
 #endif
 
-    void buzzer(bool beep);
+    void buzzer(BUZZER_LEVEL beep);
+    void trig(bool trig);
 };
 
 #endif

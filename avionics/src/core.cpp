@@ -19,7 +19,11 @@ System::System() : imu(), logger()
 
     // Signal
     pinMode(PIN_BUZZER, OUTPUT);
-    buzzer(LOW);
+    digitalWrite(PIN_BUZZER, LOW);
+
+    // Trigger
+    pinMode(PIN_TRIGGER, OUTPUT);
+    trig(LOW);
 }
 
 SYSTEM_STATE System::init()
@@ -27,12 +31,19 @@ SYSTEM_STATE System::init()
     state = SYSTEM_ERROR;
 
     // Setup logger
-    while (!logger.init())
-        ;
+    while (!logger.init()) {
+        buzzer(BUZ_LEVEL0);
+    }
+    buzzer(BUZ_LEVEL0);
 
     // Setup IMU
-    while (imu.init() != IMU_OK)
-        ;
+    while (imu.init() != IMU_OK) {
+        logger.log("Error imu initializing", LEVEL_ERROR);
+        buzzer(BUZ_LEVEL0);
+    }
+    buzzer(BUZ_LEVEL0);
+
+    buzzer(BUZ_LEVEL3);
 
     // Setup core update
 
@@ -49,7 +60,41 @@ WATCHDOG_STATE System::check_partner_state()
 }
 #endif
 
-void System::buzzer(bool beep)
+void System::buzzer(BUZZER_LEVEL beep)
 {
-    digitalWrite(PIN_BUZZER, beep);
+    const int time_quantum = 100;
+    switch (beep) {
+    case BUZ_LEVEL0:
+        for (int i = 0; i < 2; i++) {
+            digitalWrite(PIN_BUZZER, i & 0x1);
+            delay(time_quantum);
+        }
+        digitalWrite(PIN_BUZZER, LOW);
+        break;
+    case BUZ_LEVEL1:
+        for (int i = 0; i < 2; i++) {
+            digitalWrite(PIN_BUZZER, i & 0x1);
+            delay(time_quantum * 5);
+        }
+        digitalWrite(PIN_BUZZER, LOW);
+        break;
+    case BUZ_LEVEL2:
+        for (int i = 0; i <= 5; i++)
+            buzzer(BUZ_LEVEL0);
+        break;
+    case BUZ_LEVEL3:
+        buzzer(BUZ_LEVEL1);
+        for (int i = 0; i < 2; i++)
+            buzzer(BUZ_LEVEL0);
+        break;
+
+    default:
+        digitalWrite(PIN_BUZZER, LOW);
+        break;
+    }
+}
+
+void System::trig(bool trig)
+{
+    digitalWrite(PIN_TRIGGER, trig);
 }
