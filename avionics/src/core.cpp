@@ -35,6 +35,7 @@ SYSTEM_STATE System::init()
         buzzer(BUZ_LEVEL0);
     }
     buzzer(BUZ_LEVEL0);
+    logger.log("Logger initialized", LEVEL_INFO);
 
     // Setup IMU
     while (imu.init() != IMU_OK) {
@@ -42,10 +43,16 @@ SYSTEM_STATE System::init()
         buzzer(BUZ_LEVEL0);
     }
     buzzer(BUZ_LEVEL0);
+    logger.log("Imu initialized", LEVEL_INFO);
+
+    // Servo position inialize
+    parachute(SERVO_INITIAL_ANGLE);
+    logger.log("Servo initialized", LEVEL_INFO);
 
     buzzer(BUZ_LEVEL3);
 
     // Setup core update
+    logger.log("All system initialized", LEVEL_INFO);
 
     state = SYSTEM_READY;
     return state;
@@ -97,4 +104,20 @@ void System::buzzer(BUZZER_LEVEL beep)
 void System::trig(bool trig)
 {
     digitalWrite(PIN_TRIGGER, trig);
+}
+
+void System::parachute(int angle)
+{
+    trig(true);
+    servo.attach(PIN_MOTOR);
+    servo.write(angle);
+
+    // wait for the servo move to currect position
+    while (abs(servo.read() - angle) > 2)
+        delay(100);
+    delay(200);
+
+    // release the servo to save power
+    servo.detach();
+    trig(false);
 }

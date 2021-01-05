@@ -22,7 +22,11 @@
 // Signal
 #define PIN_BUZZER 2
 #define PIN_TRIGGER 6
-#define PIN_MOTOR 9
+#define PIN_MOTOR 5
+
+/*------------ Configuration for parachute --------------*/
+#define SERVO_INITIAL_ANGLE 0
+#define SERVO_RELEASE_ANGLE 90
 
 /*------------------ Constants for imu ------------------*/
 #ifdef USE_PERIPHERAL_MPU6050
@@ -59,6 +63,7 @@
 #define LOGGER_FILENAME "logger"
 #define LOGGER_FILE_EXT ".txt"
 #define LOGGER_FILENAME_BUFFER 20
+#define LOGGER_LOG_INTERVAL 100
 #endif
 
 /*-------------------- Serial debugger ------------------*/
