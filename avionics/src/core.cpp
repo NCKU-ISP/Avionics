@@ -111,12 +111,10 @@ void System::parachute(int angle)
     trig(true);
     servo.attach(PIN_MOTOR);
     servo.write(angle);
+}
 
-    // wait for the servo move to currect position
-    while (abs(servo.read() - angle) > 2)
-        delay(100);
-    delay(200);
-
+void System::parachute_release()
+{
     // release the servo to save power
     servo.detach();
     trig(false);

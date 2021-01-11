@@ -62,6 +62,7 @@ public:
     void buzzer(BUZZER_LEVEL beep);
     void trig(bool trig);
     void parachute(int angle);
+    void parachute_release();
 };
 
 #endif
