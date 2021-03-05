@@ -1,12 +1,12 @@
 #include "sensors.h"
 
-#ifdef USE_PERIPHERAL_MPU6050
+/*#ifdef USE_PERIPHERAL_MPU6050
 MPU9250 IMU::mpu(Wire, IMU_MPU_ADDR);
 
 Vector3f IMU::acc = {0, 0, 0};   // Acceleration
 Vector3f IMU::gyro = {0, 0, 0};  // Gyroscope
 Vector3f IMU::mag = {0, 0, 0};   // Magnetometer
-#endif
+#endif/*
 
 /*
 double IMU::temper = 0;   // Temperature
@@ -19,38 +19,78 @@ IMU::IMU()
     state = IMU_ERROR;
     pose = ROCKET_UNKNOWN;
 
-#ifdef USE_PERIPHERAL_MPU6050
-    // Failed to initialize MPU9250
-    if (mpu.begin() < 0)
-        return;
-
-    /* MPU 9250 settings */
-    // setting the accelerometer full scale range to +/-8G
-    mpu.setAccelRange(MPU9250::ACCEL_RANGE_8G);
-
-    // setting the gyroscope full scale range to +/-500 deg/s
-    mpu.setGyroRange(MPU9250::GYRO_RANGE_500DPS);
-
-    // setting Digital Low Pass Filter (DLPF) bandwidth to 184 Hz
-    mpu.setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_184HZ);
-
-    // setting SRD to 0 for a 1 kHz update rate
-    // magnetometer is fixed to 100 Hz if SRD <= 9
-    mpu.setSrd(0);
-
-    mpu.enableDataReadyInterrupt();
-
-    // Interrupt setting for mpu9250
-    pinMode(PIN_IMU_INT, INPUT);
-    attachInterrupt(PIN_IMU_INT, imu_isr_update, RISING);
-#endif
-
     state = IMU_OK;
 }
 
 IMU_STATE IMU::init()
 {
     state = IMU_ERROR;
+
+#ifdef USE_PERIPHERAL_MPU6050
+// join I2C bus (I2Cdev library doesn't do this automatically)
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+    Wire.begin();
+    Wire.setClock(400000);  // 400kHz I2C clock. Comment this line if having
+                            // compilation difficulties
+#elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+    Fastwire::setup(400, true);
+#endif
+
+    mpu.initialize();
+    pinMode(PIN_IMU_INT, INPUT);
+
+    if (mpu.testConnection())
+        Serial.println("MPU initialization error");
+
+    // load and configure the DMP
+    Serial.println(F("Initializing DMP..."));
+    devStatus = mpu.dmpInitialize();
+
+    // mpu.setRate();
+    // mpu.setDLPFMode();
+    // mpu.setFullScaleGyroRange(MPU6050_GYRO_FS_1000);
+    // mpu.setFullScaleAccelRange(MPU6050_ACCEL_FS_16);
+    // mpu.setDHPFMode();
+
+    // supply your own gyro offsets here, scaled for min sensitivity
+    mpu.setXGyroOffset(57);
+    mpu.setYGyroOffset(2);
+    mpu.setZGyroOffset(1);
+    mpu.setXAccelOffset(-2424);  // 1688 factory default for my test chip
+    mpu.setYAccelOffset(879);    // 1688 factory default for my test chip
+    mpu.setZAccelOffset(1064);   // 1688 factory default for my test chip
+
+    // make sure it worked (returns 0 if so)
+    if (devStatus == 0) {
+        // Calibration Time: generate offsets and calibrate our MPU6050
+        mpu.CalibrateAccel(6);
+        mpu.CalibrateGyro(6);
+        mpu.PrintActiveOffsets();
+        // turn on the DMP, now that it's ready
+        Serial.println(F("Enabling DMP..."));
+        mpu.setDMPEnabled(true);
+
+        // enable Arduino interrupt detection
+        // attachInterrupt(digitalPinToInterrupt(PIN_IMU_INT), dmpDataReady,
+        //                RISING);
+        mpuIntStatus = mpu.getIntStatus();
+
+        // set our DMP Ready flag so the main loop() function knows it's okay to
+        // use it
+        dmpReady = true;
+
+        // get expected DMP packet size for later comparison
+        packetSize = mpu.dmpGetFIFOPacketSize();
+    } else {
+        // ERROR!
+        // 1 = initial memory load failed
+        // 2 = DMP configuration updates failed
+        // (if it's going to break, usually the code will be 1)
+        Serial.print(F("DMP Initialization failed (code "));
+        Serial.print(devStatus);
+        Serial.println(F(")"));
+    }
+#endif
 
 #ifdef USE_PERIPHERAL_BMP280
     /* BMP 280 settings */
@@ -89,24 +129,30 @@ IMU_STATE IMU::init()
 }
 
 #ifdef USE_PERIPHERAL_MPU6050
-void IMU::acceleration_filter() {}
-
-void IMU::gyro_filter() {}
+volatile bool mpuInterrupt =
+    false;  // indicates whether MPU interrupt pin has gone high
+void dmpDataReady()
+{
+    mpuInterrupt = true;
+}
 
 void IMU::imu_isr_update()
 {
-    mpu.readSensor();
-    acc.x = mpu.getAccelX_mss();
-    acc.y = mpu.getAccelY_mss();
-    acc.z = mpu.getAccelZ_mss();
-
-    gyro.x = mpu.getGyroX_rads();
-    gyro.y = mpu.getGyroY_rads();
-    gyro.z = mpu.getGyroZ_rads();
-
-    mag.x = mpu.getMagX_uT();
-    mag.y = mpu.getMagY_uT();
-    mag.z = mpu.getMagZ_uT();
+    if (!dmpReady)
+        return;
+    if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) {  // Get the Latest packet
+        mpu.dmpGetQuaternion(&q, fifoBuffer);
+        mpu.dmpGetAccel(&aa, fifoBuffer);
+        mpu.dmpGetGravity(&gravity, &q);
+        mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+        mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
+        // Serial.print("aworld\t");
+        Serial.print(aaWorld.x);
+        Serial.print("\t");
+        Serial.print(aaWorld.y);
+        Serial.print("\t");
+        Serial.println(aaWorld.z);
+    }
 }
 #endif
 
@@ -118,6 +164,7 @@ float IMU::altitude_filter(float v)
     return decay;
 }
 
+#ifdef USE_PERIPHERAL_BMP280
 /* The criteria to determine launching state:
  * 1. The average first derivative of altitude is larger than
  */
@@ -128,6 +175,7 @@ void IMU::bmp_update()
     static float lastAltitude = altitude;
 
     // times 1000 because unit changes from ms to s
+    // TODO: use third derivative
     float derivative =
         1000 * (altitude - lastAltitude) / IMU_BMP_SAMPLING_PERIOD;
 
@@ -144,3 +192,4 @@ void IMU::bmp_update()
         pose = ROCKET_UNKNOWN;
     }
 }
+#endif

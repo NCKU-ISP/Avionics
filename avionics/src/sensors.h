@@ -10,22 +10,22 @@
 #define _SENSOR_H
 
 #include "Arduino.h"
-#include "MPU9250.h"
-#include "Wire.h"
-#include "configs.h"
-//#include "BMP280.h"
+//#include "Wire.h"
 #include <Adafruit_BMP280.h>
+#include "configs.h"
+
+#ifdef USE_PERIPHERAL_MPU6050
+#include "I2Cdev.h"
+#include "MPU6050_6Axis_MotionApps20.h"
+#endif
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+#include "Wire.h"
+#endif
+
+void dmpDataReady();
 
 enum IMU_STATE { IMU_RESET, IMU_OK, IMU_ERROR };
 enum ROCKET_POSE { ROCKET_UNKNOWN, ROCKET_RISING, ROCKET_FALLING };
-
-#ifdef USE_PERIPHERAL_MPU6050
-typedef struct {
-    float x;
-    float y;
-    float z;
-} Vector3f;
-#endif
 
 class IMU
 {
@@ -34,7 +34,7 @@ private:
 
 /* Sensors */
 #ifdef USE_PERIPHERAL_MPU6050
-    static MPU9250 mpu;  //(Wire, IMU_MPU_ADDR)
+    MPU6050 mpu;
 #endif
 
 #ifdef USE_PERIPHERAL_BMP280
@@ -44,20 +44,29 @@ private:
 
 /* Raw data */
 #ifdef USE_PERIPHERAL_MPU6050
-    static Vector3f acc;   // Acceleration
-    static Vector3f gyro;  // Gyroscope
-    static Vector3f mag;   // Magnetometer
+    // MPU control/status vars
+    bool dmpReady = false;   // set true if DMP init was successful
+    uint8_t mpuIntStatus;    // holds actual interrupt status byte from MPU
+    uint8_t devStatus;       // return status after each device operation (0 =
+                             // success, !0 = error)
+    uint16_t packetSize;     // expected DMP packet size (default is 42 bytes)
+    uint16_t fifoCount;      // count of all bytes currently in FIFO
+    uint8_t fifoBuffer[64];  // FIFO storage buffer
+
+    // orientation/motion vars
+    Quaternion q;    // [w, x, y, z]         quaternion container
+    VectorInt16 aa;  // [x, y, z]            accel sensor measurements
+    VectorInt16
+        aaReal;  // [x, y, z]            gravity-free accel sensor measurements
+    VectorInt16
+        aaWorld;  // [x, y, z]            world-frame accel sensor measurements
+    VectorFloat gravity;  // [x, y, z]            gravity vector
+    float euler[3];       // [psi, theta, phi]    Euler angle container
+    float ypr[3];  // [yaw, pitch, roll]   yaw/pitch/roll container and gravity
+                   // vector
 #endif
 
-/* Filter */
-#ifdef USE_PERIPHERAL_MPU6050
-    void acceleration_filter();
-
-    void gyro_filter();
-
-    void magnetic_filter();
-#endif
-
+    /* Filter */
     float altitude_filter(float v);
 
 public:
@@ -86,11 +95,13 @@ public:
  * 3. Magnetic for 100 Hz
  */
 #ifdef USE_PERIPHERAL_MPU6050
-    static void imu_isr_update();
+    void imu_isr_update();
 #endif
 
+#ifdef USE_PERIPHERAL_BMP280
     // Read pressure and temperature from bmp sensor
     void bmp_update();
+#endif
 };
 
 #endif

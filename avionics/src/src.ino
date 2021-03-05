@@ -1,35 +1,42 @@
 #include "core.h"
 
-System sys;
+System *sys;
 
 void setup()
 {
-    sys = System();
-    while (sys.init() != SYSTEM_READY) {
+    Serial.begin(38400);
+    sys = new System();
+
+    while (sys->init() != SYSTEM_READY) {
         Serial.println("System start failed");
-        sys.buzzer(BUZ_LEVEL2);
+        sys->buzzer(BUZ_LEVEL2);
     }
-    sys.logger.log("Init ok");
-    ISR_enable();
+    sys->logger.log("Init ok");
+    // ISR_enable();
 }
 
 void loop()
 {
-    if (sys.imu.pose == ROCKET_RISING) {
-        sys.buzzer(BUZ_LEVEL0);
-        sys.logger.log("Rising");
-    } else if (sys.imu.pose == ROCKET_FALLING) {
-        sys.parachute(SERVO_RELEASE_ANGLE);
-        sys.buzzer(BUZ_LEVEL1);
-        sys.logger.log("Falling");
+    if (sys->imu.pose == ROCKET_RISING) {
+        sys->buzzer(BUZ_LEVEL0);
+        sys->logger.log("Rising");
+    } else if (sys->imu.pose == ROCKET_FALLING) {
+        sys->parachute(SERVO_RELEASE_ANGLE);
+        sys->buzzer(BUZ_LEVEL1);
+        sys->logger.log("Falling");
     }
+    // sys.parachute(SERVO_RELEASE_ANGLE);
 
     // Continuous logging
+    //#ifdef USE_PERIPHERAL_SD_CARD
     static auto last_log_time = millis();
     if (millis() - last_log_time > LOGGER_LOG_INTERVAL) {
-        sys.logger.log(String(sys.imu.altitude));
+        sys->logger.log(String(sys->imu.altitude));
         last_log_time = millis();
     }
+    //#endif
+
+    sys->imu.imu_isr_update();
 }
 
 void ISR_enable()
@@ -53,7 +60,9 @@ void ISR_disable()
 
 ISR(TIMER2_COMPA_vect)
 {
+#ifdef USE_PERIPHERAL_BMP280
     sei();
     sys.imu.bmp_update();
     cli();
+#endif
 }
