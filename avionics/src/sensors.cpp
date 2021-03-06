@@ -22,10 +22,8 @@ IMU::IMU()
     state = IMU_OK;
 }
 
-IMU_STATE IMU::init()
+ERROR_CODE IMU::init()
 {
-    state = IMU_ERROR;
-
 #ifdef USE_PERIPHERAL_MPU6050
 // join I2C bus (I2Cdev library doesn't do this automatically)
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
@@ -40,10 +38,10 @@ IMU_STATE IMU::init()
     pinMode(PIN_IMU_INT, INPUT);
 
     if (mpu.testConnection())
-        Serial.println("MPU initialization error");
+        return ERROR_MPU_INIT_FAILED;
 
     // load and configure the DMP
-    Serial.println(F("Initializing DMP..."));
+    // accel scale default to +/- 2g
     devStatus = mpu.dmpInitialize();
 
     // mpu.setRate();
@@ -56,9 +54,9 @@ IMU_STATE IMU::init()
     mpu.setXGyroOffset(57);
     mpu.setYGyroOffset(2);
     mpu.setZGyroOffset(1);
-    mpu.setXAccelOffset(-2424);  // 1688 factory default for my test chip
-    mpu.setYAccelOffset(879);    // 1688 factory default for my test chip
-    mpu.setZAccelOffset(1064);   // 1688 factory default for my test chip
+    mpu.setXAccelOffset(-2424);
+    mpu.setYAccelOffset(879);
+    mpu.setZAccelOffset(1064);
 
     // make sure it worked (returns 0 if so)
     if (devStatus == 0) {
@@ -66,8 +64,8 @@ IMU_STATE IMU::init()
         mpu.CalibrateAccel(6);
         mpu.CalibrateGyro(6);
         mpu.PrintActiveOffsets();
+
         // turn on the DMP, now that it's ready
-        Serial.println(F("Enabling DMP..."));
         mpu.setDMPEnabled(true);
 
         // enable Arduino interrupt detection
@@ -86,16 +84,17 @@ IMU_STATE IMU::init()
         // 1 = initial memory load failed
         // 2 = DMP configuration updates failed
         // (if it's going to break, usually the code will be 1)
-        Serial.print(F("DMP Initialization failed (code "));
-        Serial.print(devStatus);
-        Serial.println(F(")"));
+        // Serial.print(F("DMP Initialization failed (code "));
+        // Serial.print(devStatus);
+        // Serial.println(F(")"));
+        return ERROR_DMP_INIT_FAILED;
     }
 #endif
 
 #ifdef USE_PERIPHERAL_BMP280
     /* BMP 280 settings */
     if (!bmp.begin(BMP280_ADDRESS_ALT, BMP280_CHIPID))
-        return state;
+        return ERROR_BMP_INIT_FAILED;
 
     bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,  /* Operating Mode. */
                     Adafruit_BMP280::SAMPLING_X2,  /* Temp. oversampling */
@@ -121,37 +120,36 @@ IMU_STATE IMU::init()
     // Assuming the initializing altitude is sea level
     // unit from pa to hpa
     seaLevelHpa = p / IMU_BMP_SEA_LEVEL_PRESSURE_SAMPLING / 100;
-// temper = t / IMU_BMP_SEA_LEVEL_PRESSURE_SAMPLING;
 #endif
-
-    state = IMU_OK;
-    return state;
+    return ERROR_OK;
 }
 
 #ifdef USE_PERIPHERAL_MPU6050
+/*
 volatile bool mpuInterrupt =
     false;  // indicates whether MPU interrupt pin has gone high
 void dmpDataReady()
 {
     mpuInterrupt = true;
-}
+}*/
 
-void IMU::imu_isr_update()
+bool IMU::imu_isr_update()
 {
     if (!dmpReady)
-        return;
+        return false;
     if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) {  // Get the Latest packet
         mpu.dmpGetQuaternion(&q, fifoBuffer);
         mpu.dmpGetAccel(&aa, fifoBuffer);
         mpu.dmpGetGravity(&gravity, &q);
         mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
         mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
-        // Serial.print("aworld\t");
+        /*
         Serial.print(aaWorld.x);
         Serial.print("\t");
         Serial.print(aaWorld.y);
         Serial.print("\t");
-        Serial.println(aaWorld.z);
+        Serial.println(aaWorld.z);*/
+        return true;
     }
 }
 #endif
@@ -170,7 +168,8 @@ float IMU::altitude_filter(float v)
  */
 void IMU::bmp_update()
 {
-    altitude = altitude_filter(bmp.readAltitude(seaLevelHpa));
+    // altitude = altitude_filter(bmp.readAltitude(seaLevelHpa));
+    altitude = bmp.readAltitude(seaLevelHpa);
 
     static float lastAltitude = altitude;
 

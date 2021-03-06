@@ -24,7 +24,7 @@
 
 void dmpDataReady();
 
-enum IMU_STATE { IMU_RESET, IMU_OK, IMU_ERROR };
+enum IMU_STATE { IMU_RESET, IMU_OK, IMU_ERROR, IMU_INIT_ERROR };
 enum ROCKET_POSE { ROCKET_UNKNOWN, ROCKET_RISING, ROCKET_FALLING };
 
 class IMU
@@ -90,7 +90,7 @@ public:
      * 2. Gravitivity
      * 3. Sea level pressure
      */
-    IMU_STATE init();
+    ERROR_CODE init();
 
 /* Perform sensor update
  * 1. Acceleration for 1kHz
@@ -98,7 +98,7 @@ public:
  * 3. Magnetic for 100 Hz
  */
 #ifdef USE_PERIPHERAL_MPU6050
-    void imu_isr_update();
+    bool imu_isr_update();
 #endif
 
 #ifdef USE_PERIPHERAL_BMP280

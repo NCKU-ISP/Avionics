@@ -8,10 +8,8 @@ void setup()
     sys = new System();
 
     while (sys->init() != SYSTEM_READY) {
-        Serial.println("System start failed");
         sys->buzzer(BUZ_LEVEL2);
     }
-    sys->logger.log("Init ok");
     // ISR_enable();
 }
 
@@ -28,13 +26,11 @@ void loop()
     // sys.parachute(SERVO_RELEASE_ANGLE);
 
     // Continuous logging
-    //#ifdef USE_PERIPHERAL_SD_CARD
     static auto last_log_time = millis();
     if (millis() - last_log_time > LOGGER_LOG_INTERVAL) {
         sys->logger.log(String(sys->imu.altitude));
         last_log_time = millis();
     }
-    //#endif
 
 #ifdef USE_PERIPHERAL_MPU6050
     if (sys->imu.imu_isr_update()) {
@@ -70,7 +66,7 @@ ISR(TIMER2_COMPA_vect)
 {
 #ifdef USE_PERIPHERAL_BMP280
     sei();
-    sys.imu.bmp_update();
+    sys->imu.bmp_update();
     cli();
 #endif
 }

@@ -53,7 +53,9 @@
 #endif
 
 // Signal
+#ifdef USE_PERIPHERAL_BUZZER
 #define PIN_BUZZER 2
+#endif
 #define PIN_TRIGGER 6
 #define PIN_MOTOR 5
 
@@ -96,17 +98,34 @@
 #define LOGGER_FILENAME "logger"
 #define LOGGER_FILE_EXT ".txt"
 #define LOGGER_FILENAME_BUFFER 20
-#define LOGGER_LOG_INTERVAL 100
 #endif
+#define LOGGER_LOG_INTERVAL 100
 
 /*-------------------- Serial debugger ------------------*/
 #ifdef USE_SERIAL_DEBUGGER
-#define SERIAL_DEBUGGER_BAUDRATE 9600
+#define SERIAL_DEBUGGER_BAUDRATE 38400
 #endif
 
 /*------------------ Watchdog protection ----------------*/
 #ifdef USE_DUAL_SYSTEM_WATCHDOG
 #define WATCH_SPI_TIMEOUT 100  // ms
 #endif
+
+enum ERROR_CODE {
+    ERROR_OK,
+    ERROR_SD_INIT_FAILED,
+    ERROR_MPU_INIT_FAILED,
+    ERROR_DMP_INIT_FAILED,
+    ERROR_BMP_INIT_FAILED,
+    ERROR_IMU_INIT_FAILED
+};
+
+enum INFO_CODE {
+    INFO_LOGGER_INIT,
+    INFO_IMU_INIT,
+    INFO_SERVO_INIT,
+    INFO_ALL_SYSTEM_INIT,
+    INFO_LORA_INIT
+};
 
 #endif

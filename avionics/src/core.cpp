@@ -17,9 +17,11 @@ System::System() : logger(), imu()
     digitalWrite(PIN_SPI_CS_PARTNER, HIGH);
 #endif
 
-    // Signal
+// Signal
+#ifdef USE_PERIPHERAL_BUZZER
     pinMode(PIN_BUZZER, OUTPUT);
     digitalWrite(PIN_BUZZER, LOW);
+#endif
 
     // Trigger
     pinMode(PIN_TRIGGER, OUTPUT);
@@ -28,34 +30,33 @@ System::System() : logger(), imu()
 
 SYSTEM_STATE System::init()
 {
-    state = SYSTEM_ERROR;
-
     // Setup logger
     while (!logger.init()) {
         buzzer(BUZ_LEVEL0);
     }
-    buzzer(BUZ_LEVEL0);
-    logger.log("Logger initialized", LEVEL_INFO);
+    logger.log_info(INFO_LOGGER_INIT);
 
     // Setup IMU
     while (imu.init() != IMU_OK) {
-        logger.log("Error imu initializing", LEVEL_ERROR);
+        logger.log_error(ERROR_IMU_INIT_FAILED);
         buzzer(BUZ_LEVEL0);
     }
-    buzzer(BUZ_LEVEL0);
-    logger.log("Imu initialized", LEVEL_INFO);
+    logger.log_info(INFO_IMU_INIT);
 
-    // Servo position inialize
+    // Servo position inialization
     parachute(SERVO_INITIAL_ANGLE);
-    logger.log("Servo initialized", LEVEL_INFO);
+    logger.log_info(INFO_SERVO_INIT);
+
+    // Lora initialization
+    logger.lora_init();
+    logger.log_info(INFO_LORA_INIT);
 
     buzzer(BUZ_LEVEL3);
 
     // Setup core update
-    logger.log("All system initialized", LEVEL_INFO);
+    logger.log_info(INFO_ALL_SYSTEM_INIT);
 
-    state = SYSTEM_READY;
-    return state;
+    return SYSTEM_READY;
 }
 
 #ifdef USE_DUAL_SYSTEM_WATCHDOG
@@ -69,6 +70,7 @@ WATCHDOG_STATE System::check_partner_state()
 
 void System::buzzer(BUZZER_LEVEL beep)
 {
+#ifdef USE_PERIPHERAL_BUZZER
     const int time_quantum = 100;
     switch (beep) {
     case BUZ_LEVEL0:
@@ -99,6 +101,7 @@ void System::buzzer(BUZZER_LEVEL beep)
         digitalWrite(PIN_BUZZER, LOW);
         break;
     }
+#endif
 }
 
 void System::trig(bool trig)
