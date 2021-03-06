@@ -58,8 +58,7 @@ private:
     VectorInt16 aa;  // [x, y, z]            accel sensor measurements
     VectorInt16
         aaReal;  // [x, y, z]            gravity-free accel sensor measurements
-    VectorInt16
-        aaWorld;  // [x, y, z]            world-frame accel sensor measurements
+
     VectorFloat gravity;  // [x, y, z]            gravity vector
     float euler[3];       // [psi, theta, phi]    Euler angle container
     float ypr[3];  // [yaw, pitch, roll]   yaw/pitch/roll container and gravity
@@ -70,6 +69,10 @@ private:
     float altitude_filter(float v);
 
 public:
+#ifdef USE_PERIPHERAL_MPU6050
+    VectorInt16
+        aaWorld;  // [x, y, z]            world-frame accel sensor measurements
+#endif
     float altitude;  // Altitude
 
     float seaLevelHpa;

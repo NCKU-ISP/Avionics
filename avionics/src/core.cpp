@@ -5,7 +5,7 @@
 SYSTEM_STATE System::state = SYSTEM_UP;
 #endif
 
-System::System() : imu(), logger()
+System::System() : logger(), imu()
 {
 // Pin set up
 #ifdef USE_DUAL_SYSTEM_WATCHDOG

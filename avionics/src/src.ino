@@ -36,7 +36,15 @@ void loop()
     }
     //#endif
 
-    sys->imu.imu_isr_update();
+#ifdef USE_PERIPHERAL_MPU6050
+    if (sys->imu.imu_isr_update()) {
+        int16_t data[3] = {sys->imu.aaWorld.x, sys->imu.aaWorld.y,
+                           sys->imu.aaWorld.z};
+#ifdef USE_LORA_COMMUNICATION
+        sys->logger.lora_send(LORA_ACCEL, data);
+#endif
+    }
+#endif
 }
 
 void ISR_enable()
