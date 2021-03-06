@@ -34,27 +34,28 @@ SYSTEM_STATE System::init()
     while (!logger.init()) {
         buzzer(BUZ_LEVEL0);
     }
-    logger.log_info(INFO_LOGGER_INIT);
+    logger.log_code(INFO_LOGGER_INIT, LEVEL_INFO);
 
     // Setup IMU
     while (imu.init() != IMU_OK) {
-        logger.log_error(ERROR_IMU_INIT_FAILED);
+        logger.log_code(ERROR_IMU_INIT_FAILED, LEVEL_ERROR);
         buzzer(BUZ_LEVEL0);
     }
-    logger.log_info(INFO_IMU_INIT);
+    // logger.log_info(INFO_IMU_INIT);
+    logger.log_code(INFO_IMU_INIT, LEVEL_INFO);
 
     // Servo position inialization
     parachute(SERVO_INITIAL_ANGLE);
-    logger.log_info(INFO_SERVO_INIT);
+    logger.log_code(INFO_SERVO_INIT, LEVEL_INFO);
 
     // Lora initialization
     logger.lora_init();
-    logger.log_info(INFO_LORA_INIT);
+    logger.log_code(INFO_LORA_INIT, LEVEL_INFO);
 
     buzzer(BUZ_LEVEL3);
 
     // Setup core update
-    logger.log_info(INFO_ALL_SYSTEM_INIT);
+    logger.log_code(INFO_ALL_SYSTEM_INIT, LEVEL_INFO);
 
     return SYSTEM_READY;
 }

@@ -23,7 +23,8 @@ bool Logger::init()
 #ifdef USE_PERIPHERAL_SD_CARD
     if (!SD.begin(LOGGER_SD_CS)) {
         // SD card initialization failed
-        log_error(ERROR_SD_INIT_FAILED);
+        // log_error(ERROR_SD_INIT_FAILED);
+        log_code(ERROR_SD_INIT_FAILED, LEVEL_ERROR);
         // DOTO: Check remaining size
         return false;
     }
@@ -88,14 +89,9 @@ void Logger::log(String msg, LOG_LEVEL level)
 #endif
 }
 
-void Logger::log_error(ERROR_CODE code)
+void Logger::log_code(int code, LOG_LEVEL level)
 {
-    log(String("Error:") + code, LEVEL_ERROR);
-}
-
-void Logger::log_info(INFO_CODE code)
-{
-    log(String("Info:") + code, LEVEL_INFO);
+    log(String(code), LEVEL_ERROR);
 }
 
 #ifdef USE_LORA_COMMUNICATION

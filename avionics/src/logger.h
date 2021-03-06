@@ -57,11 +57,8 @@ public:
     /* Perform logging task */
     void log(String msg, LOG_LEVEL level = LEVEL_DEBUG);
 
-    /* Log existing error code */
-    void log_error(ERROR_CODE code);
-
-    /* Log existing info code */
-    void log_info(INFO_CODE code);
+    /* Log existing error code or info code */
+    void log_code(int code, LOG_LEVEL level);
 
 #ifdef USE_LORA_COMMUNICATION
     void lora_send(LOG_LORA_MODE mode, int16_t *data);
