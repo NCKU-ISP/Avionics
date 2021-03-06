@@ -11,27 +11,31 @@
 
 #include "Arduino.h"
 //#include "Wire.h"
-#include <Adafruit_BMP280.h>
+
 #include "configs.h"
+
+#ifdef USE_PERIPHERAL_BMP280
+#include "Adafruit_BMP280_simplified.h"
+//#include "Adafruit_BMP280.h"
+#endif
 
 #ifdef USE_PERIPHERAL_MPU6050
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
-#endif
+
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
 #include "Wire.h"
 #endif
+#endif
+
 
 void dmpDataReady();
 
-enum IMU_STATE { IMU_RESET, IMU_OK, IMU_ERROR, IMU_INIT_ERROR };
 enum ROCKET_POSE { ROCKET_UNKNOWN, ROCKET_RISING, ROCKET_FALLING };
 
 class IMU
 {
 private:
-    IMU_STATE state;
-
 /* Sensors */
 #ifdef USE_PERIPHERAL_MPU6050
     MPU6050 mpu;
@@ -40,7 +44,6 @@ private:
 #ifdef USE_PERIPHERAL_BMP280
     Adafruit_BMP280 bmp;  // I2C
 #endif
-// BMP280 bmp;
 
 /* Raw data */
 #ifdef USE_PERIPHERAL_MPU6050
@@ -61,8 +64,8 @@ private:
 
     VectorFloat gravity;  // [x, y, z]            gravity vector
     float euler[3];       // [psi, theta, phi]    Euler angle container
-    float ypr[3];  // [yaw, pitch, roll]   yaw/pitch/roll container and gravity
-                   // vector
+    float ypr[3];         // [yaw, pitch, roll]   yaw/pitch/roll container and
+    // gravity vector
 #endif
 
     /* Filter */

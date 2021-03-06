@@ -37,7 +37,7 @@ SYSTEM_STATE System::init()
     logger.log_code(INFO_LOGGER_INIT, LEVEL_INFO);
 
     // Setup IMU
-    while (imu.init() != IMU_OK) {
+    while (imu.init() != ERROR_OK) {
         logger.log_code(ERROR_IMU_INIT_FAILED, LEVEL_ERROR);
         buzzer(BUZ_LEVEL0);
     }

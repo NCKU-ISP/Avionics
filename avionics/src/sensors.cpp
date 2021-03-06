@@ -16,10 +16,7 @@ double IMU::sea_level_pressure = 0;
 */
 IMU::IMU()
 {
-    state = IMU_ERROR;
     pose = ROCKET_UNKNOWN;
-
-    state = IMU_OK;
 }
 
 ERROR_CODE IMU::init()
@@ -135,9 +132,8 @@ void dmpDataReady()
 
 bool IMU::imu_isr_update()
 {
-    if (!dmpReady)
-        return false;
-    if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) {  // Get the Latest packet
+    if (dmpReady &&
+        mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) {  // Get the Latest packet
         mpu.dmpGetQuaternion(&q, fifoBuffer);
         mpu.dmpGetAccel(&aa, fifoBuffer);
         mpu.dmpGetGravity(&gravity, &q);
@@ -151,6 +147,7 @@ bool IMU::imu_isr_update()
         Serial.println(aaWorld.z);*/
         return true;
     }
+    return false;
 }
 #endif
 
@@ -168,8 +165,10 @@ float IMU::altitude_filter(float v)
  */
 void IMU::bmp_update()
 {
-    // altitude = altitude_filter(bmp.readAltitude(seaLevelHpa));
+// altitude = altitude_filter(bmp.readAltitude(seaLevelHpa));
+#ifdef USE_PERIPHERAL_BMP280
     altitude = bmp.readAltitude(seaLevelHpa);
+#endif
 
     static float lastAltitude = altitude;
 

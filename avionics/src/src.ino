@@ -28,7 +28,8 @@ void loop()
     // Continuous logging
     static auto last_log_time = millis();
     if (millis() - last_log_time > LOGGER_LOG_INTERVAL) {
-        sys->logger.log(String(sys->imu.altitude));
+        sys->imu.bmp_update();
+        sys->logger.log(String(sys->imu.altitude), LEVEL_INFO);
         last_log_time = millis();
     }
 
@@ -42,7 +43,7 @@ void loop()
     }
 #endif
 }
-
+/*
 void ISR_enable()
 {
     TCCR2A = 0;
@@ -64,9 +65,9 @@ void ISR_disable()
 
 ISR(TIMER2_COMPA_vect)
 {
-#ifdef USE_PERIPHERAL_BMP280
+#if defined(USE_PERIPHERAL_BMP280) || defined(USE_PERIPHERAL_BMP280_LIB)
     sei();
     sys->imu.bmp_update();
     cli();
 #endif
-}
+}*/
