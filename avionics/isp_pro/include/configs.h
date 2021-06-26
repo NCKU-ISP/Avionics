@@ -73,13 +73,11 @@
 /*-------------------- Communication -------------------*/
 /*------------------------------------------------------*/
 #ifdef USE_LORA_COMMUNICATION
-#define RF_FREQUENCY 433000000  // Hz  center frequency
-#define TX_OUTPUT_POWER 22      // dBm tx output power
-
+#define RF_FREQUENCY 868000000  // Hz center frequency
 // bandwidth=125khz  0:250kHZ,1:125kHZ,2:62kHZ,3:20kHZ....
-// look for radio line 392
-#define LORA_BANDWIDTH 4
-#define LORA_SPREADING_FACTOR 7  // spreading factor=11 [SF5..SF12]
+#define LORA_BANDWIDTH 0
+#define LORA_SPREADING_FACTOR 7
+#define TX_OUTPUT_POWER 22  // dBm tx output power
 #define LORA_CODINGRATE 1
 // [1: 4/5,     \
     //  2: 4/6,     \
@@ -90,9 +88,13 @@
 #define LORA_SYMBOL_TIMEOUT 0             // Symbols
 #define LORA_FIX_LENGTH_PAYLOAD_ON false  // variable data payload
 #define LORA_IQ_INVERSION_ON false
-#define LORA_PAYLOADLENGTH \
-    0  // 0: variable receive length \
-            // 1..255 payload length
+#define LORA_PREAMBLE_LENGTH 8  // Same for Tx and Rx
+#define LORA_SYMBOL_TIMEOUT 0   // Symbols
+#define LORA_FIX_LENGTH_PAYLOAD_ON false
+#define LORA_IQ_INVERSION_ON false
+#define RX_TIMEOUT_VALUE 3000
+#define TX_TIMEOUT_VALUE 3000
+#define LORA_PACKET_SIZE 64  // Define the payload size here
 #endif
 
 #ifdef USE_DUAL_SYSTEM_WATCHDOG

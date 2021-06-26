@@ -33,12 +33,15 @@ SYSTEM_STATE System::init()
     // Setup logger
     while (!logger.init()) {
         buzzer(BUZ_LEVEL0);
+        logger.log_code(ERROR_LOGGER_INIT_FAILED, LEVEL_ERROR);
     }
     logger.log_code(INFO_LOGGER_INIT, LEVEL_INFO);
 
     // Setup IMU
-    while (imu.init() != ERROR_OK) {
-        logger.log_code(ERROR_IMU_INIT_FAILED, LEVEL_ERROR);
+    ERROR_CODE err = ERROR_MPU_INIT_FAILED;
+    while (err != ERROR_OK) {
+        err = imu.init();
+        logger.log_code(err, LEVEL_ERROR);
         buzzer(BUZ_LEVEL0);
     }
     // logger.log_info(INFO_IMU_INIT);

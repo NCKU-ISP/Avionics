@@ -23,10 +23,10 @@
 // A0~A5 map to 14~19
 // A0-14, A1-15, A2-16, A3-17, A4-18, A5-19
 #ifdef USE_LORA_COMMUNICATION
-#define PIN_LORA_INTERRUPT 3
-#define PIN_LORA_BUSY A2
-#define PIN_LORA_RESET A3
-#define PIN_LORA_SELECT A1
+#define PIN_LORA_INTERRUPT 3    // DIO1
+#define PIN_LORA_BUSY A2    // BUSY
+#define PIN_LORA_RESET A3   // RST
+#define PIN_LORA_SELECT A1  // NSS
 
 #define RF_FREQUENCY 433000000  // Hz  center frequency
 #define TX_OUTPUT_POWER 22      // dBm tx output power
@@ -114,6 +114,7 @@
 
 enum ERROR_CODE {
     ERROR_OK,
+    ERROR_LOGGER_INIT_FAILED,
     ERROR_SD_INIT_FAILED,
     ERROR_MPU_INIT_FAILED,
     ERROR_DMP_INIT_FAILED,
@@ -126,7 +127,9 @@ enum INFO_CODE {
     INFO_IMU_INIT,
     INFO_SERVO_INIT,
     INFO_ALL_SYSTEM_INIT,
-    INFO_LORA_INIT
+    INFO_LORA_INIT,
+    INFO_RISING,
+    INFO_FALLING
 };
 
 #endif
