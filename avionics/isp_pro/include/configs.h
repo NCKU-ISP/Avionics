@@ -122,6 +122,17 @@
 #define IMU_MPU_ADDR 0x68
 #endif
 
+/*------------------------------------------------------*/
+/*------------------------- GPS ------------------------*/
+/*------------------------------------------------------*/
+#ifdef USE_PERIPHERAL_GPS
+#define PIN_GPS_RX 16
+#define PIN_GPS_TX 17
+
+// once you modify this, you should reconfigurate your GPS module.
+#define GPS_DEFAULT_BAUDRATE 9600
+#endif
+
 // BMP280 setting
 #ifdef USE_PERIPHERAL_BMP280
 //#define IMU_BMP_ADDR       0x76
