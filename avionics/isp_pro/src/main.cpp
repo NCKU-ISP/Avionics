@@ -35,10 +35,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Core.h>
 #include <configs.h>
 
+
+// Semaphore to protect the manipulation of SPI bus
+SemaphoreHandle_t spiSemaphore = NULL;
+
 System sys;
 
 void setup()
 {
+    vSemaphoreCreateBinary(spiSemaphore);
+
     // put your setup code here, to run once:
     sys.init();
 

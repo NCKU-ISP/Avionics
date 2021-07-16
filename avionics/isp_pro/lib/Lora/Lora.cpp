@@ -1,6 +1,10 @@
 #include "Lora.h"
 
 #ifdef USE_LORA_COMMUNICATION
+
+// Semaphore to protect the manipulation of SPI bus
+extern SemaphoreHandle_t spiSemaphore;
+
 hw_config hwConfig;
 RadioEvents_t RadioEvents;
 
@@ -132,6 +136,7 @@ void LoraCommunication::begin()
 
 void LoraCommunication::update()
 {
+    xSemaphoreTake(spiSemaphore, portMAX_DELAY);
     if (!cadBusy && !q_tx.isEmpty()) {
         q_tx.pop(TxBuffer);
         Radio.Standby();
@@ -142,6 +147,7 @@ void LoraCommunication::update()
         Radio.StartCad();
     }
     Radio.IrqProcess();
+    xSemaphoreGive(spiSemaphore);
     delay(50);
     yield();
 }
