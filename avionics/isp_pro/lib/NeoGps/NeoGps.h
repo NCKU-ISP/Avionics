@@ -61,7 +61,7 @@ public:
 
     void begin(const uint8_t rx_pin = PIN_GPS_RX,
                const uint8_t tx_pin = PIN_GPS_TX,
-               const uint16_t baudrate = 9600);
+               const uint16_t baudrate = GPS_DEFAULT_BAUDRATE);
 
     void update();
 };

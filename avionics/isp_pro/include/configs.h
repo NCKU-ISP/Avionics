@@ -6,14 +6,14 @@
 /*--------------- System function enable ---------------*/
 /*------------------------------------------------------*/
 //#define USE_DUAL_SYSTEM_WATCHDOG
-//#define USE_PERIPHERAL_SD_CARD
+#define USE_PERIPHERAL_SD_CARD
 #define USE_PERIPHERAL_BMP280
 //#define USE_PERIPHERAL_BMP280_LIB
 #define USE_PERIPHERAL_MPU6050
 #define USE_PERIPHERAL_BUZZER
 #define USE_SERIAL_DEBUGGER
-//#define USE_LORA_COMMUNICATION
-//#define USE_PERIPHERAL_GPS
+#define USE_LORA_COMMUNICATION
+#define USE_PERIPHERAL_GPS
 
 /*------------------------------------------------------*/
 /*--------------------- PIN_SETTING --------------------*/
@@ -43,10 +43,15 @@
 
 // Communication
 #ifdef USE_LORA_COMMUNICATION
-#define PIN_LORA_INTERRUPT 35  // DIO1
-#define PIN_LORA_BUSY 34       // BUSY
-#define PIN_LORA_RESET 2       // RST
-#define PIN_LORA_SELECT 15     // NSS
+#define PIN_SLORA_INTERRUPT 35  // DIO1
+#define PIN_SLORA_BUSY 34       // BUSY
+#define PIN_SLORA_RESET 2       // RST
+#define PIN_SLORA_SELECT 15     // NSS
+#define PIN_SLORA_SCLK 18
+#define PIN_SLORA_MISO 19
+#define PIN_SLORA_MOSI 23
+#define PIN_RADIO_TXEN -1
+#define PIN_RADIO_RXEN -1
 #endif
 
 #ifdef USE_PERIPHERAL_GPS
@@ -80,9 +85,9 @@
 #define TX_OUTPUT_POWER 22  // dBm tx output power
 #define LORA_CODINGRATE 1
 // [1: 4/5,     \
-    //  2: 4/6,     \
-    //  3: 4/7,     \
-    //  4: 4/8]
+//  2: 4/6,     \
+//  3: 4/7,     \
+//  4: 4/8]
 
 #define LORA_PREAMBLE_LENGTH 8            // Same for Tx and Rx
 #define LORA_SYMBOL_TIMEOUT 0             // Symbols
@@ -120,6 +125,7 @@
 //#define PIN_IMU_INT 2
 // an MPU9250 object with the MPU-9250 sensor on I2C bus 0 with address 0x68
 #define IMU_MPU_ADDR 0x68
+#define IMU_ISR_SAMPLING_PERIOD 10  // ms
 #endif
 
 /*------------------------------------------------------*/
@@ -131,6 +137,7 @@
 
 // once you modify this, you should reconfigurate your GPS module.
 #define GPS_DEFAULT_BAUDRATE 9600
+#define GPS_SAMPLING_PERIOD 200  // ms
 #endif
 
 // BMP280 setting
@@ -142,7 +149,7 @@
 #endif
 // Altitude setting
 // tau = (-T) / log(a), with a=0.8 and T=10(ms), tau about to 103.2 (ms)
-#define IMU_ALTITUDE_SMOOTHING_CONSTANT 0.0f
+#define IMU_ALTITUDE_SMOOTHING_CONSTANT 0.8f
 #define IMU_RISING_CRITERIA 10.0f
 #define IMU_FALLING_CRITERIA -10.0f
 #define IMU_ACCEL_CRITERIA_MAGNITUDE 5
@@ -152,7 +159,7 @@
 /*---------------------- Data logger -------------------*/
 /*------------------------------------------------------*/
 #ifdef USE_PERIPHERAL_SD_CARD
-#define LOGGER_FILENAME "logger"
+#define LOGGER_FILENAME "/logger"
 #define LOGGER_FILE_EXT ".txt"
 #define LOGGER_FILENAME_BUFFER 20
 #endif
@@ -171,6 +178,15 @@
 #ifdef USE_DUAL_SYSTEM_WATCHDOG
 #define WATCH_SPI_TIMEOUT 100  // ms
 #endif
+
+/*------------------------------------------------------*/
+/*-------------- Battery Voltage Detector --------------*/
+/*------------------------------------------------------*/
+#define PIN_BATTERY_VOLTAGE_DETECTOR 36
+#define BATTERY_VOLATGE_LOWER_BOUND 4
+#define BATTERY_VOLATGE_UPPER_BOUND 8
+#define BATTERY_CIRCUIT_SCALING 57 / 10
+#define BATTERY_SAMPLING_PERIOD 500  // ms
 
 enum ERROR_CODE {
     ERROR_OK,

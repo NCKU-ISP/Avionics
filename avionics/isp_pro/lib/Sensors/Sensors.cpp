@@ -144,14 +144,14 @@ bool IMU::imu_isr_update()
             mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
             mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
 
-            Serial.print(aaWorld.x);
+            /*Serial.print(aaWorld.x);
             Serial.print("\t");
             Serial.print(aaWorld.y);
             Serial.print("\t");
-            Serial.println(aaWorld.z);
+            Serial.println(aaWorld.z);*/
 
             float aaSize = aaReal.getMagnitude();
-            if (aaSize > IMU_ACCEL_CRITERIA_MAGNITUDE) {
+            /*if (aaSize > IMU_ACCEL_CRITERIA_MAGNITUDE) {
                 // moving
                 gravity.normalize();
                 float inner = (gravity.x * aaReal.x + gravity.y * aaReal.y +
@@ -169,7 +169,7 @@ bool IMU::imu_isr_update()
                 // else if (inner < -IMU_ACCEL_CRITERIA_INNER)
                 //    pose = ROCKET_RISING;
             } else
-                pose = ROCKET_UNKNOWN;
+                pose = ROCKET_UNKNOWN;*/
 
             mpu_last_update_time = millis() & 0x0FFF;
             imu_update_flag = 0xFF;
@@ -194,10 +194,8 @@ float IMU::altitude_filter(float v)
  */
 void IMU::bmp_update()
 {
-// altitude = altitude_filter(bmp.readAltitude(seaLevelHpa));
-#ifdef USE_PERIPHERAL_BMP280
-    altitude = bmp.readAltitude(seaLevelHpa);
-#endif
+    altitude = altitude_filter(bmp.readAltitude(seaLevelHpa));
+    // altitude = bmp.readAltitude(seaLevelHpa);
 
     static float lastAltitude = altitude;
 
@@ -209,14 +207,24 @@ void IMU::bmp_update()
     // Updating altitude record
     lastAltitude = altitude;
 
-    if (derivative > IMU_RISING_CRITERIA) {
-        // Rocket rising
+    // Digital Filter for altitude
+    static uint8_t rising_filter = 0;
+    static uint8_t falling_filter = 0;
+
+    rising_filter |= (derivative > IMU_RISING_CRITERIA);
+    falling_filter |= (derivative < IMU_FALLING_CRITERIA);
+
+    // Rocket rising
+    if ((rising_filter & 0b0111) == 0b0111)
         pose = ROCKET_RISING;
-    } else if (derivative < IMU_FALLING_CRITERIA) {
-        // Rocket falling
+    // Rocket falling
+    else if ((falling_filter & 0b0111) == 0b0111)
         pose = ROCKET_FALLING;
-    } else {
+    // Other
+    else
         pose = ROCKET_UNKNOWN;
-    }
+
+    rising_filter = rising_filter << 1;
+    falling_filter = falling_filter << 1;
 }
 #endif

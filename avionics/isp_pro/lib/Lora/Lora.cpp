@@ -67,6 +67,38 @@ void LoraPacketMessage::serialize(uint8_t *buf)
     memcpy(buf + 3, msg, size);
 }
 
+LoraPacketSystemState::LoraPacketSystemState(const uint8_t _id,
+                                             const uint8_t _battery,
+                                             const int8_t _satellite,
+                                             const float _height,
+                                             const float _speed,
+                                             const float _rolling,
+                                             const int32_t _longitude,
+                                             const int32_t _latitude)
+    : LoraPacket(_id)
+{
+    // copy the data
+    data.state.battery = _battery;
+    data.state.satellite = _satellite;
+    data.state.height = _height;
+    data.state.speed = _speed;
+    data.state.angular_velocity = _rolling;
+    data.state.longitude = _longitude & 0xFF;
+    data.state.latitude = _latitude & 0xFF;
+}
+
+LoraPacketSystemState::LoraPacketSystemState(uint8_t *buf) : LoraPacket(buf[1])
+{
+    timestamp = buf[2];
+    memcpy(data.raw, buf + 3, size);
+}
+
+void LoraPacketSystemState::serialize(uint8_t *buf)
+{
+    pack_header(size, buf);
+    memcpy(buf + 3, data.raw, size);
+}
+
 LoraCommunication::LoraCommunication()
     : q_tx(sizeof(uint8_t) * LORA_PACKET_SIZE, TX_BUFFER_LEN, FIFO, false),
       q_rx(sizeof(uint8_t) * LORA_PACKET_SIZE, RX_BUFFER_LEN, FIFO, false)

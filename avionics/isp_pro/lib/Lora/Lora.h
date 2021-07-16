@@ -40,7 +40,7 @@ class LoraPacketFloat_3d : public LoraPacket
 {
 private:
 public:
-    static const uint8_t size = 6;
+    static const uint8_t size = 1 + sizeof(float) * 3;
     union {
         float vector[3];
         uint8_t raw[size];
@@ -68,6 +68,41 @@ public:
 
     /* Construct the packet with raw data. */
     LoraPacketMessage(uint8_t *buf);
+
+    /* Copy the serialized data into buffer. */
+    virtual void serialize(uint8_t *buf);
+};
+
+class LoraPacketSystemState : public LoraPacket
+{
+private:
+public:
+    static const uint8_t size = 6 + sizeof(float) * 3;
+    union {
+        struct {
+            uint8_t battery;
+            int8_t satellite;
+            float height;
+            float speed;
+            float angular_velocity;
+            uint16_t longitude;
+            uint16_t latitude;
+        } state;
+        uint8_t raw[size];
+    } data;
+
+    /* Feed with the data to send. */
+    LoraPacketSystemState(const uint8_t _id,
+                          const uint8_t _battery,
+                          const int8_t _satellite,
+                          const float _height,
+                          const float _speed,
+                          const float _rolling,
+                          const int32_t _longitude,
+                          const int32_t _latitude);
+
+    /* Construct the packet with raw data. */
+    LoraPacketSystemState(uint8_t *buf);
 
     /* Copy the serialized data into buffer. */
     virtual void serialize(uint8_t *buf);
