@@ -10,15 +10,22 @@
 #ifndef _CORE_H
 #define _CORE_H
 
-#include "Arduino.h"
-#include "configs.h"
-#include "logger.h"
-#include "sensors.h"
+#include <Arduino.h>
+#include <../../include/configs.h>
+#include <logger.h>
+#include <sensors.h>
+#include <WIFI_comms.h>
 
+
+#include <ArduinoOTA.h>
 #include <Servo.h>
 
+#ifdef ENGINE_LOADING_TEST
+#include <HX711.h>
+#endif
+
 enum SYSTEM_STATE { SYSTEM_UP = 0, SYSTEM_READY, SYSTEM_ERROR };
-enum SPI_MASTER { SPI_NONE, SPI_SD, SPI_COMMUNICATION };
+enum SPI_MASTER { SPI_NONE, SPI_SD, SPI_COMMUNICATION};
 enum BUZZER_LEVEL { BUZ_LEVEL0, BUZ_LEVEL1, BUZ_LEVEL2, BUZ_LEVEL3 };
 
 #define TIMER_PRESCALER_1 0x01
@@ -40,11 +47,25 @@ private:
     volatile SPI_MASTER sd_master;
 
     Servo servo;
+    int closeAngle = SERVO_INITIAL_ANGLE
+      , openAngle = SERVO_RELEASE_ANGLE;    // For setting servo angle
+    bool start = false;
+    int release_t = RELEASE_TIME;
+    int stop_t = STOP_TIME;
+
+    void OTA_init();
+
+    #ifdef ENGINE_LOADING_TEST
+    HX711 loadcell;
+    #endif
 
 public:
     SYSTEM_STATE state;
     IMU imu;
     Logger logger;
+#ifdef USE_WIFI_COMMUNICATION
+    wifiServer comms;
+#endif
 
     System();
 
@@ -54,6 +75,16 @@ public:
      */
     SYSTEM_STATE init();
 
+/* For WiFi communication */
+    bool wifi_send(uint8_t num, String payload);
+    bool wifi_send(uint8_t num, const char * payload);
+
+    bool wifi_broadcast(String payload);
+    bool wifi_broadcast(const char * payload);
+
+    void loop();
+
+
 /* Check if the partner mcu report normal */
 #ifdef USE_DUAL_SYSTEM_WATCHDOG
     WATCHDOG_STATE check_partner_state();
@@ -61,8 +92,15 @@ public:
 
     void buzzer(BUZZER_LEVEL beep);
     void trig(bool trig);
-    void parachute(int angle);
-    void parachute_release();
+    void fairingOpen(int angle = SERVO_RELEASE_ANGLE);
+    void fairingClose(int angle = SERVO_INITIAL_ANGLE);
+    void fairingServoOff();
+    void setFairingLimit(int close, int open);
+    void setMotor(int motor, int angle);
+
+    void command(String *command);
+    void flight();
+    void loading_test(String *command);
 };
 
 #endif
