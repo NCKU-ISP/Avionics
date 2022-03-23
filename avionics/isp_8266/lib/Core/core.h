@@ -15,6 +15,7 @@
 #include <logger.h>
 #include <sensors.h>
 #include <WIFI_comms.h>
+#include <Ticker.h>
 
 
 #include <ArduinoOTA.h>
@@ -24,9 +25,19 @@
 #include <HX711.h>
 #endif
 
-enum SYSTEM_STATE { SYSTEM_UP = 0, SYSTEM_READY, SYSTEM_ERROR };
+enum SYSTEM_STATE { SYSTEM_UP, SYSTEM_READY, SYSTEM_ERROR };
 enum SPI_MASTER { SPI_NONE, SPI_SD, SPI_COMMUNICATION};
-enum BUZZER_LEVEL { BUZ_LEVEL0, BUZ_LEVEL1, BUZ_LEVEL2, BUZ_LEVEL3 };
+enum BUZZER_LEVEL { BUZ_NONE, BUZ_LEVEL1, BUZ_LEVEL2, BUZ_LEVEL3, BUZ_LEVEL4 };
+enum CMD_TYPE { CMD_SERIAL, CMD_WIFI, CMD_BOTH };
+enum ROCKET_STATE { ROCKET_READY, ROCKET_PREFLIGHT, ROCKET_OFFGROUND, ROCKET_LANDED};
+enum FAIRING_TYPE { F_SERVO, F_TRIGGER };
+enum COMMS_STATE { WIFI_DISCONNECTED, WIFI_CONNECTED};
+typedef struct rocket_status {
+    ROCKET_STATE state;
+    bool fairing;
+    FAIRING_TYPE ftype;
+    COMMS_STATE cState;
+}ROC_STATE;
 
 #define TIMER_PRESCALER_1 0x01
 #define TIMER_PRESCALER_8 0x02
@@ -46,10 +57,22 @@ private:
     unsigned long last_update_time;
     volatile SPI_MASTER sd_master;
 
-    Servo servo;
-    int closeAngle = SERVO_INITIAL_ANGLE
+    Ticker buzzer;
+    Ticker fly_plan;
+    Ticker log;
+    Ticker stream;
+
+    String data = "";
+
+    #ifdef PARACHUTE_SERVO
+        Servo servo;
+    #elif defined(USE_SERVO_CONTROL)
+        Servo servo[4];
+    #endif
+    int closeAngle = SERVO_CLOSED_ANGLE
       , openAngle = SERVO_RELEASE_ANGLE;    // For setting servo angle
-    bool start = false;
+    bool wait_log = false;
+    bool wait_stream = false;
     int release_t = RELEASE_TIME;
     int stop_t = STOP_TIME;
 
@@ -61,11 +84,17 @@ private:
 
 public:
     SYSTEM_STATE state;
-    IMU imu;
+    ROC_STATE rocket = {
+        .state = ROCKET_READY,
+        .fairing = false,
+        .ftype = F_SERVO
+    };
     Logger logger;
+    IMU imu;
 #ifdef USE_WIFI_COMMUNICATION
     wifiServer comms;
 #endif
+    String core_cmd;
 
     System();
 
@@ -76,11 +105,6 @@ public:
     SYSTEM_STATE init();
 
 /* For WiFi communication */
-    bool wifi_send(uint8_t num, String payload);
-    bool wifi_send(uint8_t num, const char * payload);
-
-    bool wifi_broadcast(String payload);
-    bool wifi_broadcast(const char * payload);
 
     void loop();
 
@@ -90,15 +114,14 @@ public:
     WATCHDOG_STATE check_partner_state();
 #endif
 
-    void buzzer(BUZZER_LEVEL beep);
+    void buzz(BUZZER_LEVEL beep);
     void trig(bool trig);
-    void fairingOpen(int angle = SERVO_RELEASE_ANGLE);
-    void fairingClose(int angle = SERVO_INITIAL_ANGLE);
-    void fairingServoOff();
+    void fairing(int angle);
+    void servoOff();
     void setFairingLimit(int close, int open);
-    void setMotor(int motor, int angle);
+    void setServo(Servo servo, int angle);
 
-    void command(String *command);
+    bool command(String cmd, CMD_TYPE type = CMD_SERIAL);
     void flight();
     void loading_test(String *command);
 };

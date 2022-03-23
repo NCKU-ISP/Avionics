@@ -12,13 +12,17 @@
 
 /*--------------- System function enable ---------------*/
 // #define USE_SERIAL_DEBUGGER
-#define USE_SERIAL_COMMS
+// #define USE_SERIAL_COMMS
 // #define USE_GPS_NEO6M
 #define USE_PERIPHERAL_BMP280
 // #define USE_PERIPHERAL_BMP280_LIB
 // #define USE_PERIPHERAL_MPU6050
-// #define USE_GY91_MPU9250
+#define USE_GY91_MPU9250
 #define USE_PERIPHERAL_BUZZER
+
+#define PARACHUTE_SERVO
+// #define USE_SERVO_CONTROL
+// #define PARACHUTE_TRIGGER
 // #define ENGINE_LOADING_TEST
 
 #if defined(V1_ATMEGA328P) || defined(V2_ESP32)
@@ -77,11 +81,23 @@
 #endif
 #elif defined(V2_ESP8266)
 #define PIN_TRIGGER 12
+#ifdef PARACHUTE_TRIGGER
 #define PIN_TRIGGER_2 14
+#elif defined(PARACHUTE_SERVO)
 #define PIN_MOTOR 13
+#endif
+
 #ifdef USE_PERIPHERAL_BUZZER
 #define PIN_BUZZER 0
 #endif
+
+#ifdef USE_SERVO_CONTROL
+#define PIN_SERVO_1 0
+#define PIN_SERVO_2 2
+#define PIN_SERVO_3 13
+#define PIN_SERVO_4 15
+#endif
+
 #elif defined(V2_ESP32)
 #define PIN_TRIGGER 6
 #define PIN_MOTOR 5
@@ -123,11 +139,11 @@
 
 
 /*------------ Configuration for parachute --------------*/
-#define SERVO_INITIAL_ANGLE 0
+#define SERVO_CLOSED_ANGLE 0
 #define SERVO_RELEASE_ANGLE 160
 #define release_by_time
 #define RELEASE_TIME 10000
-#define STOP_TIME 100000
+#define STOP_TIME 20000
 
 /*------------------ Constants for imu ------------------*/
 #ifdef USE_PERIPHERAL_MPU6050

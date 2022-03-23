@@ -77,6 +77,7 @@ public:
     void log_code(int code, LOG_LEVEL level);
 
     void newFile(LOG_LEVEL level=LEVEL_DEBUG);
+    void appendFile(String path);
 
     /* List file on board */
     String listFile(String path = "/");
@@ -94,7 +95,7 @@ public:
     String readFile(String fileName, int *pos);
 
     String fsInfo();
-    String remain_space();
+    String remainSpace();
 
 #ifdef USE_LORA_COMMUNICATION
     void lora_send(LOG_LORA_MODE mode, int16_t *data);

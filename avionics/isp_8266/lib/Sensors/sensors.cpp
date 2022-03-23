@@ -239,7 +239,6 @@ float IMU::bmp_update()
     } else {
         pose = ROCKET_UNKNOWN;
     }
-
+#endif
     return est_altitude;
-    #endif
 }

@@ -39,6 +39,9 @@ class wifiServer : public Logger
 private:
     String getContentType(String fileName);
 
+    ESP8266WebServer server;
+    WebSocketsServer webSocket;
+
     // WebSocketEvent waits for webSocket client to send command
     void webSocketEvent(uint8_t num,
                         WStype_t type,
@@ -46,21 +49,25 @@ private:
                         size_t length);
 
 public:
-    ESP8266WebServer server;
-    WebSocketsServer webSocket;
-
-    int dB;
-
-    String message;
 
     wifiServer(void);
+
+    String message;
+    
+    int dB;
 
     bool init(const char *ssid = WIFI_SSID,
               const char *passward = WIFI_PASSWARD);
 
     bool handleFileRead(String path);  // Stream file for web client
 
-    void loop();  // Put this loop to main.ino loop()
+    bool wifi_send(uint8_t num, String payload, bool cleanMsg=true);
+    bool wifi_send(uint8_t num, const char * payload, bool cleanMsg=true);
+
+    bool wifi_broadcast(String payload, bool cleanMsg=true);
+    bool wifi_broadcast(const char * payload, bool cleanMsg=true);
+
+    void loop();  // Put this loop to core loop()
 };
 #endif
 #endif
