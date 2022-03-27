@@ -4,9 +4,9 @@ System *sys;
 
 void setup()
 {
-    delay(1000);
+    delay(100);
     Serial.begin(115200);
-    Serial.setDebugOutput(true);
+    // Serial.setDebugOutput(true);
     Serial.end();
 
     sys = new System();

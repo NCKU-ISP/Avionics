@@ -17,12 +17,13 @@
 #define USE_PERIPHERAL_BMP280
 // #define USE_PERIPHERAL_BMP280_LIB
 // #define USE_PERIPHERAL_MPU6050
-#define USE_GY91_MPU9250
+// #define USE_GY91_MPU9250
 #define USE_PERIPHERAL_BUZZER
 
-#define PARACHUTE_SERVO
+// #define LAUNCH_TRIGGER
+// #define PARACHUTE_SERVO
 // #define USE_SERVO_CONTROL
-// #define PARACHUTE_TRIGGER
+#define PARACHUTE_TRIGGER
 // #define ENGINE_LOADING_TEST
 
 #if defined(V1_ATMEGA328P) || defined(V2_ESP32)
@@ -80,7 +81,9 @@
 #define PIN_BUZZER 2
 #endif
 #elif defined(V2_ESP8266)
+#ifdef LAUNCH_TRIGGER
 #define PIN_TRIGGER 12
+#endif
 #ifdef PARACHUTE_TRIGGER
 #define PIN_TRIGGER_2 14
 #elif defined(PARACHUTE_SERVO)
@@ -88,9 +91,11 @@
 #endif
 
 #ifdef USE_PERIPHERAL_BUZZER
-#define PIN_BUZZER 0
+#define PIN_BUZZER 3
 #endif
 
+#define SERVO_PULSE_MIN 500
+#define SERVO_PULSE_MAX 2500
 #ifdef USE_SERVO_CONTROL
 #define PIN_SERVO_1 0
 #define PIN_SERVO_2 2
@@ -128,8 +133,8 @@
 #define AP_AS_SERVER  // Access point as server (Sky)
 // #define STA_AS_SERVER  // Station as server (Ground)
 #ifdef V2_ESP8266
-#define WIFI_SSID "ESP8266_avionics"      // default ssid
-#define WIFI_PASSWARD "ESP8266_avionics"  // default passward
+#define WIFI_SSID "isp8266_fire"      // default ssid
+#define WIFI_PASSWARD NULL  //"ESP8266_avionics"  // default passward
 #define WIFI_HOST_NAME "nckuisp"          // default host name
 #elif defined(V3_PIONEER)
 #define WIFI_SSID "Pioneer"       // default ssid
@@ -140,9 +145,9 @@
 
 /*------------ Configuration for parachute --------------*/
 #define SERVO_CLOSED_ANGLE 0
-#define SERVO_RELEASE_ANGLE 160
+#define SERVO_RELEASE_ANGLE 90
 #define release_by_time
-#define RELEASE_TIME 10000
+#define RELEASE_TIME 5000
 #define STOP_TIME 20000
 
 /*------------------ Constants for imu ------------------*/

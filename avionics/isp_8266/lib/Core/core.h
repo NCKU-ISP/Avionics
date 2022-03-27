@@ -37,6 +37,7 @@ typedef struct rocket_status {
     bool fairing;
     FAIRING_TYPE ftype;
     COMMS_STATE cState;
+    BUZZER_LEVEL buzzState;
 }ROC_STATE;
 
 #define TIMER_PRESCALER_1 0x01
@@ -87,7 +88,8 @@ public:
     ROC_STATE rocket = {
         .state = ROCKET_READY,
         .fairing = false,
-        .ftype = F_SERVO
+        .ftype = F_SERVO,
+        .buzzState = BUZ_LEVEL1
     };
     Logger logger;
     IMU imu;
@@ -114,12 +116,12 @@ public:
     WATCHDOG_STATE check_partner_state();
 #endif
 
-    void buzz(BUZZER_LEVEL beep);
-    void trig(bool trig);
+    BUZZER_LEVEL buzz(BUZZER_LEVEL beep, int times = 0);
+    void trig(int pin, bool trig);
     void fairing(int angle);
     void servoOff();
     void setFairingLimit(int close, int open);
-    void setServo(Servo servo, int angle);
+    void setServo(Servo *s, int angle);
 
     bool command(String cmd, CMD_TYPE type = CMD_SERIAL);
     void flight();

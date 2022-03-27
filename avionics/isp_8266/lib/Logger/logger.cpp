@@ -137,7 +137,7 @@ String Logger::listFile(String path) {
     File entry = dir.openFile("r");
     // Separate by comma if there are multiple files
     if (output != "[")
-      output += ",\n";
+      output += "\n";
     output += String(entry.name()).substring(0);
     entry.close();
   }

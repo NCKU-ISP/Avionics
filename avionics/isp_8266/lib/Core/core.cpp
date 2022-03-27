@@ -31,9 +31,13 @@ System::System()
 // Trigger
 #ifdef PARACHUTE_TRIGGER
   pinMode(PIN_TRIGGER_2, OUTPUT);
-  digitalWrite(PIN_TRIGGER_2, 0);
+  digitalWrite(PIN_TRIGGER_2, LOW);
 #elif defined(PARACHUTE_SERVO)
-  servo.attach(PIN_MOTOR);
+  servo.attach(PIN_MOTOR, SERVO_PULSE_MIN, SERVO_PULSE_MAX);
+#endif
+#ifdef LAUNCH_TRIGGER
+  pinMode(PIN_TRIGGER, OUTPUT);
+  digitalWrite(PIN_TRIGGER, LOW);
 #endif
 
 #ifdef USE_SERVO_CONTROL
@@ -100,7 +104,8 @@ SYSTEM_STATE System::init() {
 
   Serial.println("Ready!");
 #endif
-  buzz(BUZ_LEVEL1);
+
+  rocket.buzzState = buzz(BUZ_LEVEL1);
 
   return SYSTEM_READY;
 }
@@ -152,8 +157,9 @@ void System::loop() {
   if (comms.message != "") {
     command(comms.message, CMD_WIFI);
   }
-  else if (Serial.available() || keep) {
-    static String serial_cmd = "";
+
+  static String serial_cmd = "";
+  if (Serial.available() || serial_cmd != "") {
     char c = (char)Serial.read();
     if (c != '\n' && !keep)
       serial_cmd += c;
@@ -167,6 +173,7 @@ void System::loop() {
     command(core_cmd, CMD_BOTH);
     core_cmd = "";
   }
+  // servo.write(180);
 
   imu.bmp_update();
 
@@ -198,29 +205,60 @@ WATCHDOG_STATE System::check_partner_state() {
 }
 #endif
 
-void System::buzz(BUZZER_LEVEL beep) {
+BUZZER_LEVEL System::buzz(BUZZER_LEVEL beep, int times /* = 0 */) {
 #ifdef USE_PERIPHERAL_BUZZER
   const float unit_time = 0.1; // seconds
+  static int counter = 0;
   buzzer.detach();
   switch (beep) {
   case BUZ_LEVEL1:
     buzzer.attach(10 * unit_time, [=]() {
       digitalWrite(PIN_BUZZER, !digitalRead(PIN_BUZZER));
+      if (times > 0) {
+        counter++;
+        Serial.println(counter);
+        if (counter >= 2 * times) {
+          Serial.println("stop");
+          counter = 0;
+          buzz(rocket.buzzState);
+        }
+      }
     });
     break;
   case BUZ_LEVEL2:
     buzzer.attach(5 * unit_time, [=]() {
       digitalWrite(PIN_BUZZER, !digitalRead(PIN_BUZZER));
+      if (times > 0) {
+        counter++;
+        if (counter >= 2 * times) {
+          counter = 0;
+          buzz(rocket.buzzState);
+        }
+      }
     });
     break;
   case BUZ_LEVEL3:
     buzzer.attach(2 * unit_time, [=]() {
       digitalWrite(PIN_BUZZER, !digitalRead(PIN_BUZZER));
+      if (times > 0) {
+        counter++;
+        if (counter >= 2 * times) {
+          counter = 0;
+          buzz(rocket.buzzState);
+        }
+      }
     });
     break;
   case BUZ_LEVEL4:
     buzzer.attach(1 * unit_time, [=]() {
       digitalWrite(PIN_BUZZER, !digitalRead(PIN_BUZZER));
+      if (times > 0) {
+        counter++;
+        if (counter >= 2 * times) {
+          counter = 0;
+          buzz(rocket.buzzState);
+        }
+      }
     });
     break;
 
@@ -228,37 +266,39 @@ void System::buzz(BUZZER_LEVEL beep) {
     digitalWrite(PIN_BUZZER, LOW);
     break;
   }
+
+  return beep;
 #endif
 }
 
-void System::trig(bool trig) {
+void System::trig(int pin, bool trig) {
 #ifdef V3_PIONEER
   digitalWrite(S0, 1);
   digitalWrite(S1, 1);
   digitalWrite(S2, 1);
   digitalWrite(PIN_CD4051, trig);
 #else
-  digitalWrite(PIN_TRIGGER, trig);
+  digitalWrite(pin, trig);
 #endif
 }
 
 void System::fairing(int angle) {
   // ON is true, OFF is false
-  bool on_off = angle == SERVO_RELEASE_ANGLE;
+  bool on_off = angle == openAngle;
 #ifdef PARACHUTE_SERVO
-  setServo(servo, angle);
+  setServo(&servo, angle);
 #elif defined(PARACHUTE_TRIGGER)
-  trig(on_off);
+  trig(PIN_TRIGGER_2, on_off);
 #endif
   rocket.fairing = on_off;
 
-  buzz(BUZ_LEVEL4);
+  rocket.buzzState = buzz(BUZ_LEVEL4);
 }
 
 void System::servoOff() {
 // release the servo to save power
 #ifdef PARACHUTE_TRIGGER
-  trig(false);
+  trig(PIN_TRIGGER_2, false);
 #elif defined(PARACHUTE_SERVO)
   servo.detach();
 #endif
@@ -269,7 +309,13 @@ void System::setFairingLimit(int close, int open) {
   openAngle = open;
 }
 
-void System::setServo(Servo servo, int angle) { servo.write(angle); }
+void System::setServo(Servo *s, int angle) {
+  #ifdef PARACHUTE_SERVO
+  if (!s->attached())
+    s->attach(PIN_MOTOR, SERVO_PULSE_MIN, SERVO_PULSE_MAX);
+  s->write(angle);
+  #endif
+}
 
 bool System::command(String cmd, CMD_TYPE type) {
   String msg = "";
@@ -280,7 +326,7 @@ bool System::command(String cmd, CMD_TYPE type) {
     fairing(openAngle);
     msg = "open fairing done";
     if (rocket.state == ROCKET_OFFGROUND) {
-      logger.log("open");
+      logger.log("open", LEVEL_FLIGHT);
       logger.f.close();
       logger.appendFile(logger.file_ext);
     }
@@ -301,6 +347,11 @@ bool System::command(String cmd, CMD_TYPE type) {
   } else if (cmd == "detach") {
     servoOff();
     msg = "servo detached";
+  } else if (cmd.substring(0, 5) == "motor") {
+    #ifdef PARACHUTE_SERVO
+    setServo(&servo, cmd.substring(6).toInt());
+    msg = "set servo done";
+    #endif
   }
 
   // Preflight command
@@ -310,10 +361,10 @@ bool System::command(String cmd, CMD_TYPE type) {
       static int counter = 0;
       counter++;
       digitalWrite(PIN_BUZZER, !digitalRead(PIN_BUZZER));
-      if (counter == 14) {
+      if (counter == 16) {
         buzzer.detach();
         digitalWrite(PIN_BUZZER, 1);
-        buzzer.once(3, [=]() { buzz(BUZ_NONE); });
+        buzzer.once(3, [=]() { rocket.buzzState = buzz(BUZ_NONE); });
       }
     });
     msg = "Start count down sequence.";
@@ -323,18 +374,23 @@ bool System::command(String cmd, CMD_TYPE type) {
   else if (cmd == "launch" && rocket.state == ROCKET_PREFLIGHT) {
     rocket.state = ROCKET_OFFGROUND;
     logger.newFile(LEVEL_FLIGHT);
+    comms.wifi_broadcast("launch");
     msg = logger.file_ext + " launch";
 
     fly_plan.once_ms(release_t, [=]() {
       core_cmd = "open";
       fly_plan.detach();
       fly_plan.once_ms(stop_t, [=]() {
-        buzz(BUZ_LEVEL3);
+        rocket.buzzState = buzz(BUZ_LEVEL3);
         core_cmd = "stop";
       });
     });
     core_cmd = "stream";
     log.attach_ms(10, [=]() { wait_log = true; });
+
+#ifdef LAUNCH_TRIGGER
+    trig(PIN_TRIGGER, true);
+#endif
   }
 
   // Recording command
@@ -343,7 +399,7 @@ bool System::command(String cmd, CMD_TYPE type) {
     logger.f.close();
     msg = "stop," + logger.file_ext + ": recording stopped";
 
-    buzz(BUZ_LEVEL3);
+    rocket.buzzState = buzz(BUZ_LEVEL3);
     fly_plan.detach();
     log.detach();
     wait_log = false;
@@ -370,29 +426,27 @@ bool System::command(String cmd, CMD_TYPE type) {
   // File manipulation
   //
   else if (cmd == "list") { // List all file command
-    msg = logger.listFile();
-  } 
-  
-  //==================Problem to solve=========================//
+    msg = "l," + logger.listFile();
+  }
+
   else if (cmd.substring(0, 4) == "read" &&
-             rocket.state != ROCKET_OFFGROUND) { // Read specific file
+           rocket.state != ROCKET_OFFGROUND) { // Read specific file
     static int pos = 0;
     static bool stream_active;
-    if (pos == 0) {
+    if (stream.active()) {
       stream_active = stream.active();
-      if (stream_active)
-        core_cmd = "nostream";
+      core_cmd = "nostream";
+    } else {
+      msg = logger.readFile(cmd.substring(5), &pos);
+      if (pos == -1) {
+        keep = false;
+        pos = 0;
+      } else
+        keep = true;
+      if (!keep && stream_active)
+        core_cmd = "stream";
     }
-    msg = logger.readFile(cmd.substring(5), &pos);
-    if (pos == -1) {
-      keep = false;
-      pos = 0;
-    } else
-      keep = true;
-    if (!keep && stream_active)
-      core_cmd = "stream";
-  } 
-  //==================Problem to solve=========================//
+  }
 
   else if (cmd.substring(0, 6) == "delete") { // Delete specific file
     msg = cmd.substring(7) + ":" + logger.deleteFile(cmd.substring(7))
@@ -409,15 +463,26 @@ bool System::command(String cmd, CMD_TYPE type) {
   }
 
   else if (cmd.substring(0, 4) == "buzz") {
-    buzz((BUZZER_LEVEL)cmd.substring(4).toInt());
+    rocket.buzzState = buzz((BUZZER_LEVEL)cmd.substring(4).toInt());
     msg = cmd;
   }
 
   else if (cmd == "rocket") {
-    msg += String(rocket.state) + '\n';
-    msg += String(rocket.fairing) + '\n';
-    msg += String(rocket.ftype) + '\n';
-    msg += String(rocket.cState);
+    msg += "state: " + String(rocket.state) + '\n';
+    msg += "fairing: " + rocket.fairing ? "open" : "closed" + '\n';
+    msg += "fairing type: " + (rocket.ftype == F_TRIGGER) ? "trigger"
+                                                          : "servo" + '\n';
+    msg += "comms state: " + String(rocket.cState);
+    msg += "release at " + String(release_t) + "ms\n";
+    msg += "stop at " + String(stop_t) + "ms\n";
+  }
+
+  else if (cmd == "connected") {
+    buzz(BUZ_LEVEL4, 2);
+    comms.message = "";
+  } else if (cmd == "disconnected") {
+    buzz(BUZ_LEVEL4, 4);
+    comms.message = "";
   }
 
   else if (cmd.substring(0, 5) == "print") {
@@ -425,19 +490,21 @@ bool System::command(String cmd, CMD_TYPE type) {
   } else if (cmd == "nostream") {
     stream.detach();
     wait_stream = false;
-    msg = "OK";
+    msg = "nostream";
   } else if (cmd == "stream") {
     if (!stream.active())
       stream.attach_ms(100, [=]() { wait_stream = true; });
-    msg = "OK";
+    msg = "stream";
   }
 
   // Print out msg through serial or wifi
   if (msg != "") {
     if (type == CMD_SERIAL || type == CMD_BOTH)
       Serial.println(msg);
-    if (type == CMD_WIFI || type == CMD_BOTH)
+    if (type == CMD_WIFI)
       comms.wifi_broadcast(msg, !keep);
+    if (type == CMD_BOTH)
+      comms.wifi_broadcast(msg, false);
   }
 
   return keep;
@@ -474,6 +541,10 @@ void System::flight() {
   if (wait_stream) {
     command("print" + data, CMD_WIFI);
     wait_stream = false;
+  }
+
+  if (speed < -12 && height < 10) {
+    core_cmd = "stop";
   }
 }
 

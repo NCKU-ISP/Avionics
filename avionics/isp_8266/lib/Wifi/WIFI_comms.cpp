@@ -128,6 +128,7 @@ void wifiServer::webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     Serial.printf("[%u] Disconnected!\n", num);
     device = String(num) + " disconnected";
     webSocket.broadcastTXT(device);
+    message = "disconnected";
     break;
   // If websocket is connected
   case WStype_CONNECTED: {
@@ -138,6 +139,7 @@ void wifiServer::webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     // Send message to client
     device = String(num) + " has connected";
     webSocket.broadcastTXT(device);
+    message = "connected";
   } break;
   // If websocket get text message (Use this as command)
   case WStype_TEXT:
