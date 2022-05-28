@@ -57,7 +57,7 @@ SYSTEM_STATE System::init() {
   comms.init();
 #endif
 
-  // OTA_init();
+  OTA_init();
   // logger.log_code(INFO_LOGGER_INIT, LEVEL_INFO);
 
   // Setup IMU
@@ -107,6 +107,8 @@ SYSTEM_STATE System::init() {
 
   rocket.buzzState = buzz(BUZ_LEVEL1);
 
+   setServo(&servo, SERVO_CLOSED_ANGLE);
+
   return SYSTEM_READY;
 }
 
@@ -144,7 +146,7 @@ void System::OTA_init() {
   ArduinoOTA.begin();
   Serial.println("Ready");
   Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+  Serial.println(WiFi.softAPIP());
 }
 
 void System::loop() {
@@ -180,6 +182,8 @@ void System::loop() {
   flight();
 
   loading_test(&comms.message);
+
+  ArduinoOTA.handle();
 #endif
 
 // ArduinoOTA.handle();

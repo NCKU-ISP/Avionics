@@ -21,9 +21,9 @@
 #define USE_PERIPHERAL_BUZZER
 
 // #define LAUNCH_TRIGGER
-// #define PARACHUTE_SERVO
+#define PARACHUTE_SERVO
 // #define USE_SERVO_CONTROL
-#define PARACHUTE_TRIGGER
+// #define PARACHUTE_TRIGGER
 // #define ENGINE_LOADING_TEST
 
 #if defined(V1_ATMEGA328P) || defined(V2_ESP32)
@@ -144,11 +144,17 @@
 
 
 /*------------ Configuration for parachute --------------*/
-#define SERVO_CLOSED_ANGLE 0
-#define SERVO_RELEASE_ANGLE 90
+#define V3_1
+#ifdef V3_1
+#define SERVO_CLOSED_ANGLE 110
+#define SERVO_RELEASE_ANGLE 170
+#elif defined(V3_2)
+#define SERVO_CLOSED_ANGLE 80
+#define SERVO_RELEASE_ANGLE 150
+#endif
 #define release_by_time
-#define RELEASE_TIME 5000
-#define STOP_TIME 20000
+#define RELEASE_TIME 8000
+#define STOP_TIME 45000
 
 /*------------------ Constants for imu ------------------*/
 #ifdef USE_PERIPHERAL_MPU6050

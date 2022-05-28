@@ -1,7 +1,7 @@
 {
     "name": "NCKU ISP Ground Station",
     "short_name": "NCKU_ISP_GND_STA",
-    "start_url": "/avionics/src/data/index.html",
+    "start_url": "/index.html",
     "display": "standalone",
     "background_color": "#000000",
     "theme_color": "#000000",
