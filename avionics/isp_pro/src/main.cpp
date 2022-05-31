@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <Core.h>
 #include <SX126x-Arduino.h>
-#include <configs.h>
+#include <../../include/configs.h>
 
 #ifdef USE_LORA_COMMUNICATION
 #include <Lora.h>

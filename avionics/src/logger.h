@@ -14,7 +14,7 @@
 #include <SD.h>
 #include <SPI.h>
 #include "Arduino.h"
-#include "configs.h"
+#include "configs.h"z
 
 #ifdef USE_LORA_COMMUNICATION
 #include <SX126x.h>
