@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" class="notranslate" translate="no">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
+    <meta name="google" content="notranslate" />
+    <title>NCKU ISP Ground Station</title>
+    <!-- materialize icons, css & js-->
+    <link type="text/css" href="./css/style.css" rel="stylesheet">
+    <link rel="manifest" href="./manifest.json">
+    <!-- ios support -->
+    <link rel="apple-touch-icon" href="./icons/icon-144x144.png">
+    <meta name="apple-mobile-web-app">
+    <meta name="theme-color" content="#FFFFFF">
+</head>
+
+<body id="body">
+    <div id="check">
+        <span class="nav"><span class="text nav-text nav-check">Check</span></span>
+        <span class="btn-square remove-before-flight" id="RBF_btn"><span
+                class="text btn-text RBF">Remove<br>before<br>flight</span></span>
+        <span class="btn-square init" id="init_btn"><span class="text btn-text Init">Initialize</span></span>
+        <span class="btn-square stallation" id="stall_btn"><span
+                class="text btn-text Stallation">Stallation</span></span>
+        <span class="btn-square flight-angle" id="angle_btn"><span class="text btn-text Angle">countdown</span></span>
+        <span class="launch" id="launch_btn"><span class="launch-text">Launch</span></span>
+        <span id="count-down">
+            <span class="count-down-text">10</span>
+            <span id="abort"><span class="abort-text">Abort</span></span>
+        </span>
+    </div>
+
+    <div id="status">
+        <span class="nav"><span class="text nav-text nav-status">Status</span></span>
+        <span class="flight-time">
+            <span class="flight-time-box"></span>
+            <span class="text flight-time-text">T+</span>
+            <span class="text" id="flight_time">0</span>
+            <span class="text unit flight-time-unit">s</span>
+        </span>
+        <span class="apogee">
+            <span class="apogee-box"></span>
+            <span class="text apogee-text">Apogee</span>
+            <span class="text" id="apogee">0</span>
+            <span class="text unit apogee-unit">m</span>
+        </span>
+        <span class="attitude"><span class="signal-strength">0</span></span>
+        <span class="state"><span id="state" class="state-text">Launch</span></span>
+        <span class="speed">
+            <span class="text speed-text">Speed</span>
+            <span class="text" id="speed">0</span>
+            <span class="speed-unit">
+                <span class="text unit speed-unit-m">m</span>
+                <span class="text unit speed-unit-s">s</span>
+                <span class="speed-unit-slash"></span>
+            </span>
+        </span>
+        <span class="height">
+            <span class="text height-text">Height</span>
+            <span class="text" id="height">0</span>
+            <span class="text unit height-unit">m</span>
+        </span>
+        <span class="distance">
+            <span class="text distance-text">Distance</span>
+            <span class="text" id="distance">0</span>
+            <span class="text unit distance-unit">m</span>
+        </span>
+        <span id="parachute">
+            <span class="text parachute-text">Parachute Deploy</span>
+        </span>
+    </div>
+
+    <div id="map">
+        <span class="nav"><span class="text nav-text nav-map">Map</span></span>
+        <span class="distance-2">
+            <span class="text distance-text">Distance</span>
+            <span class="text" id="distance">0</span>
+            <span class="text unit distance-unit">m</span>
+        </span>
+        <span class="pointer"></span>
+        <span class="google-map"></span>
+    </div>
+
+    <div id="command">
+        <span class="nav"><span class="text nav-text nav-command">Command</span></span>
+        <textarea id="console" readonly onchange="apple();"></textarea>
+        <span class="text clear-text">Clear</span>
+        <input type="text" id="txBar" autocapitalize="none" onfocus="command_fixed(true);"
+            onfocusout="command_fixed(false);">
+        <span id="send"></span>
+
+        <span id="test" style="display: none;"><span class="test-text">test</span></span>
+        <span id="stop-test" style="display: none;"><span class="stop-test-text">stop</span></span>
+
+    </div>
+
+    <div id="file">
+        <span class="nav"><span class="text nav-text nav-file">File Explorer</span></span>
+        <select id="file-read" class="file-read-text" onchange=goto()><option selected disabled>Read</option></select>
+        <select id="file-download" class="file-download-text" onchange=download()><option selected disabled>download</option></select>
+    </div>
+
+    <div id="debug">
+        <span class="nav"><span class="text nav-text nav-debug">Debugger</span></span>
+    </div>
+
+    <script>
+        function reload(path){
+            alert(path);
+            window.location.reload();
+        }
+    </script>
+
+    <script src="./js/app.js" onerror="reload('app.js')"></script>
+    <script src="./js/sketch.js" onerror="reload('sketch.js')"></script>
+    <script src="./js/button.js" onerror="reload('button.js')"></script>
+    <script src="./js/socket.js" onerror="reload('socket.js')"></script>
+    <script src="./js/command.js" onerror="reload('command.js')"></script>
+
+</body>
+
+</html>
