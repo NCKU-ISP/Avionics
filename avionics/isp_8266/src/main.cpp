@@ -4,7 +4,7 @@ System *sys;
 
 void setup()
 {
-    delay(100);
+    delay(3000);
     Serial.begin(115200);
     // Serial.setDebugOutput(true);
     Serial.end();

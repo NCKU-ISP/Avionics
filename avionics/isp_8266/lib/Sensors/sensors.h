@@ -80,7 +80,7 @@ public:
 
 #ifdef USE_PERIPHERAL_BMP280
     Adafruit_BMP280 bmp;  // I2C
-    SimpleKalmanFilter altitudeKalmanFilter;
+    SimpleKalmanFilter *altitudeKalmanFilter;
 #endif
 
 #ifdef USE_PERIPHERAL_MPU6050

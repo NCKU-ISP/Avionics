@@ -76,6 +76,7 @@ private:
     bool wait_stream = false;
     int release_t = RELEASE_TIME;
     int stop_t = STOP_TIME;
+    int count_down_time = 10;
 
     void OTA_init();
 
@@ -104,7 +105,7 @@ public:
      * 1. sensors
      * 2. logger
      */
-    SYSTEM_STATE init();
+    SYSTEM_STATE init(bool soft_init = true);
 
 /* For WiFi communication */
 

@@ -26,6 +26,7 @@ bool Logger::init() {
 #endif
 
 #ifdef USE_PERIPHERAL_SD_CARD
+  SD.end();
   if (!SD.begin(LOGGER_SD_CS)) {
     // SD card initialization failed
     // log_error(ERROR_SD_INIT_FAILED);
@@ -42,6 +43,7 @@ bool Logger::init() {
     file_ext = filename + String(i) + extension;
 
 #elif defined(USE_FILE_SYSTEM)
+  filesystem->end();
   if (!filesystem->begin()) {
     Serial.println("LittleFS mount failed");
     return false;

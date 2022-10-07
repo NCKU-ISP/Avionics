@@ -236,6 +236,8 @@ enum INFO_CODE {
     INFO_LORA_INIT
 };
 
+#define LIFT_OFF_PROTECT_TIME 3000
+
 #endif
 
 #ifdef ENGINE_LOADING_TEST

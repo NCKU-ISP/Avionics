@@ -7,7 +7,7 @@ var mess = '';
 var file;
 
 function socket_connect() {
-    socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+    socket = new WebSocket('ws://' + '192.168.4.1' + ':81/');
 
     socket.onopen = function () {
         socket.send("Connected");

@@ -78,6 +78,7 @@ bool wifiServer::handleFileRead(String path) {
       path += ".gz";
     }
     File file = filesystem->open(path, "r"); // Open file by path
+    server.sendHeader("Access-Control-Allow-Origin", "*");
     server.streamFile(file, contentType);    // stream the file to all clients
     file.close();
     return true;

@@ -67,6 +67,9 @@
             <span class="text" id="distance">0</span>
             <span class="text unit distance-unit">m</span>
         </span>
+        <span id="emergency">
+            <span class="text emergency-text">Emergency Stop</span>
+        </span>
         <span id="parachute">
             <span class="text parachute-text">Parachute Deploy</span>
         </span>
@@ -83,6 +86,12 @@
         <span class="google-map"></span>
     </div>
 
+    <div id="file">
+        <span class="nav"><span class="text nav-text nav-file">File Explorer</span></span>
+        <select id="file-read" class="file-read-text" onchange=goto()><option selected disabled>Read</option></select>
+        <select id="file-download" class="file-download-text" onchange=download()><option selected disabled>download</option></select>
+    </div>
+
     <div id="command">
         <span class="nav"><span class="text nav-text nav-command">Command</span></span>
         <textarea id="console" readonly onchange="apple();"></textarea>
@@ -93,13 +102,6 @@
 
         <span id="test" style="display: none;"><span class="test-text">test</span></span>
         <span id="stop-test" style="display: none;"><span class="stop-test-text">stop</span></span>
-
-    </div>
-
-    <div id="file">
-        <span class="nav"><span class="text nav-text nav-file">File Explorer</span></span>
-        <select id="file-read" class="file-read-text" onchange=goto()><option selected disabled>Read</option></select>
-        <select id="file-download" class="file-download-text" onchange=download()><option selected disabled>download</option></select>
     </div>
 
     <div id="debug">
@@ -113,7 +115,11 @@
         }
     </script>
 
-    <script src="./js/app.js" onerror="reload('app.js')"></script>
+    <script src="./js/app.js" onerror="reload('./js/app.js')"></script>
+    <script src="./js/button.js" onerror="reload('button.js')"></script>
+    <script src="./js/command.js" onerror="reload('commandjs')"></script>
+    <script src="./js/page.js" onerror="reload('page.js')"></script>
+    <script src="./js/socket.js" onerror="reload('socketjs')"></script>
 
 </body>
 

@@ -122,9 +122,9 @@ div {
     top: calc(50% - 23px/2);
 }
 .btn-text.Angle {
-    width: 51px;
+    width: 101px;
     height: 23px;
-    left: calc(50% - 51px/2 - 0.5px);
+    left: calc(50% - 101px/2 - 0.5px);
     top: calc(50% - 23px/2);
 }
 .btn-text.Stallation {
@@ -489,12 +489,32 @@ div {
     width: 344px;
     height: 80px;
     left: calc(50% - 344px/2);
-    top: calc(50% - 50px/2 + 282px);
+    bottom: 2%;
     
     background: #FF7A00;
     border-radius: 12px;
 }
 .parachute-text {
+    left: 10%;
+    right: 10%;
+    top: 20%;
+    bottom: 20%;
+    
+    font-size: 30px;
+    line-height: 35px;
+}
+
+#emergency{
+    position: absolute;
+    width: 344px;
+    height: 80px;
+    left: calc(50% - 344px/2);
+    bottom: calc(4% + 80px);
+    
+    background: #ff0000;
+    border-radius: 12px;
+}
+.emergency-text {
     left: 10%;
     right: 10%;
     top: 20%;

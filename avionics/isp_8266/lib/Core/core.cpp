@@ -48,16 +48,26 @@ System::System()
 #endif
 }
 
-SYSTEM_STATE System::init() {
+SYSTEM_STATE System::init(bool soft_init) {
+  rocket = {.state = ROCKET_READY,
+            .fairing = false,
+            .ftype = F_SERVO,
+            .buzzState = BUZ_LEVEL1};
+
+  rocket.buzzState = buzz(BUZ_LEVEL1);
+
+  setServo(&servo, SERVO_CLOSED_ANGLE);
+
   // Setup logger
   while (!logger.init()) {
     // buzzer(BUZ_LEVEL0);
   }
 #ifdef USE_WIFI_COMMUNICATION
-  comms.init();
+  if (soft_init)
+    comms.init();
 #endif
-
-  OTA_init();
+  if (soft_init)
+    OTA_init();
   // logger.log_code(INFO_LOGGER_INIT, LEVEL_INFO);
 
   // Setup IMU
@@ -66,6 +76,9 @@ SYSTEM_STATE System::init() {
     // buzzer(BUZ_LEVEL0);
     comms.wifi_broadcast(String("ERROR_IMU_INIT_FAILED") + LEVEL_ERROR);
     Serial.println("imu_fail");
+    digitalWrite(PIN_BUZZER, 1);
+  } else {
+    Serial.println("imu initialized success");
   }
 // // logger.log_info(INFO_IMU_INIT);
 // // logger.log_code(INFO_IMU_INIT, LEVEL_INFO);
@@ -104,10 +117,6 @@ SYSTEM_STATE System::init() {
 
   Serial.println("Ready!");
 #endif
-
-  rocket.buzzState = buzz(BUZ_LEVEL1);
-
-   setServo(&servo, SERVO_CLOSED_ANGLE);
 
   return SYSTEM_READY;
 }
@@ -314,11 +323,11 @@ void System::setFairingLimit(int close, int open) {
 }
 
 void System::setServo(Servo *s, int angle) {
-  #ifdef PARACHUTE_SERVO
+#ifdef PARACHUTE_SERVO
   if (!s->attached())
     s->attach(PIN_MOTOR, SERVO_PULSE_MIN, SERVO_PULSE_MAX);
   s->write(angle);
-  #endif
+#endif
 }
 
 bool System::command(String cmd, CMD_TYPE type) {
@@ -352,10 +361,15 @@ bool System::command(String cmd, CMD_TYPE type) {
     servoOff();
     msg = "servo detached";
   } else if (cmd.substring(0, 5) == "motor") {
-    #ifdef PARACHUTE_SERVO
+#ifdef PARACHUTE_SERVO
     setServo(&servo, cmd.substring(6).toInt());
     msg = "set servo done";
-    #endif
+#endif
+  }
+
+  else if (cmd.substring(0, 5) == "count") {
+    count_down_time = cmd.substring(5).toInt();
+    msg = "count-down:" + String(count_down_time);
   }
 
   // Preflight command
@@ -365,7 +379,8 @@ bool System::command(String cmd, CMD_TYPE type) {
       static int counter = 0;
       counter++;
       digitalWrite(PIN_BUZZER, !digitalRead(PIN_BUZZER));
-      if (counter == 16) {
+      
+      if (count_down_time < 3 || counter == 2*count_down_time) {
         buzzer.detach();
         digitalWrite(PIN_BUZZER, 1);
         buzzer.once(3, [=]() { rocket.buzzState = buzz(BUZ_NONE); });
@@ -501,6 +516,12 @@ bool System::command(String cmd, CMD_TYPE type) {
     msg = "stream";
   }
 
+  // soft initialization (initialize without disconnect wifi)
+  else if (cmd == "init") {
+    init(false);
+    msg = "soft init";
+  }
+
   // Print out msg through serial or wifi
   if (msg != "") {
     if (type == CMD_SERIAL || type == CMD_BOTH)
@@ -521,13 +542,15 @@ void System::flight() {
   height = imu.est_altitude;
   speed = imu.velocity;
 #endif
-
+  static auto T_start = -1;
   if (rocket.state == ROCKET_OFFGROUND) {
-    static auto T_start = millis();
+    if(T_start == -1) T_start= millis();
     auto T_now = millis();
-    data_head = String("f,") + (T_now - T_start);
+    auto T_plus = T_now - T_start;
+    data_head = String("f,") + T_plus;
 
-    if (imu.pose == ROCKET_FALLING && !rocket.fairing) {
+    if (imu.pose == ROCKET_FALLING && !rocket.fairing &&
+        T_plus > LIFT_OFF_PROTECT_TIME) {
       // fairing(openAngle);
       core_cmd = "open";
     }
@@ -535,9 +558,13 @@ void System::flight() {
     data_head = String("s,0");
   }
 
+  if (rocket.state == ROCKET_LANDED) {
+    T_start = -1;
+  }
+
   if (wait_log || wait_stream)
     data = data_head + ',' + height + ',' + speed + ',' + imu.pose + ',' +
-           comms.dB;
+           comms.dB + ',' + imu.altitude + ',' + imu.seaLevelHpa;
   if (wait_log) {
     logger.log(data, LEVEL_FLIGHT);
     wait_log = false;
