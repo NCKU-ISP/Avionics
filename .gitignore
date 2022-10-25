@@ -36,3 +36,13 @@ scripts/__pycache__/
 *.bak
 *.dwl
 *.dwl2
+
+.vscode/
+.pio/
+cmake-build-*/
+/node_modules/
+/dist
+*.vsix
+yarn.lock
+package-lock.json
+*.dict
