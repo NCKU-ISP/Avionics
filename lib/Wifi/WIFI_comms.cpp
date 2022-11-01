@@ -1,6 +1,9 @@
 #include "WIFI_comms.h"
 #ifdef USE_WIFI_COMMUNICATION
 
+payload_t data;
+uint8_t sendTo[10240];
+
 wifiServer::wifiServer() : server(80), webSocket(81), message(""), dB(0) {}
 
 bool wifiServer::init(const char *ssid /*=WIFI_SSID*/,

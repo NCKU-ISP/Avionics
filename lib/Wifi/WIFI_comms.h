@@ -26,8 +26,6 @@
 typedef struct payload_t {
     char message[256];
 } payload_t;
-payload_t data;
-uint8_t sendTo[];
 
 void onDataSend(uint8_t *mac_addr, uint8_t status);
 void onDataRecv(uint8_t *mac_addr, uint8_t *payload, uint8_t length);
