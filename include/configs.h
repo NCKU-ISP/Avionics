@@ -33,7 +33,7 @@
 #elif defined(V2_ESP8266) || defined(V3_PIONEER)
 #define USE_WIFI_COMMUNICATION
 #define USE_FILE_SYSTEM
-// #define ESP_NOW
+#define ESP_NOW
 #endif
 
 /*--------------------- PIN_SETTING --------------------*/
