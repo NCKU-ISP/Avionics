@@ -54,7 +54,7 @@ bool wifiServer::init(const char *ssid /*=WIFI_SSID*/,
     // Init ESP-NOW
     if (esp_now_init() != 0) {
         Serial.println("Error initializing ESP-NOW");
-        return;
+        return false;
     }
     // Once ESPNow is successfully Init, we will register for Send CB to
     // get the status of Trasnmitted packet
