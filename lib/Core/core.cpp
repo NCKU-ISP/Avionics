@@ -178,11 +178,11 @@ void System::loop()
         int c = Serial.read();
         if (c <= 0 || c >= 0xfe) {
         } else if (c != '\n' && !keep) {
-            Serial.print((char)c);
+            Serial.print((char) c);
             serial_cmd += (char) c;
         } else {
-            Serial.println("");
             keep = command(serial_cmd, CMD_SERIAL);
+            comms.wifi_broadcast(serial_cmd);
             if (!keep)
                 serial_cmd = "";
         }
