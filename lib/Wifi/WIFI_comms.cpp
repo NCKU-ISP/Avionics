@@ -2,7 +2,8 @@
 #ifdef USE_WIFI_COMMUNICATION
 
 payload_t data;
-uint8_t sendTo[10240];
+// uint8_t sendTo[] = {0xE8, 0xDB, 0x84, 0x94, 0x6B, 0x78};
+uint8_t sendTo[] = {0xBC, 0xFF, 0x4D, 0x18, 0xF5, 0xF6};
 
 wifiServer::wifiServer() : server(80), webSocket(81), message(""), dB(0) {}
 
@@ -58,12 +59,11 @@ bool wifiServer::init(const char *ssid /*=WIFI_SSID*/,
     }
     // Once ESPNow is successfully Init, we will register for Send CB to
     // get the status of Trasnmitted packet
-    esp_now_set_self_role(ESP_NOW_ROLE_COMBO);
     esp_now_register_send_cb(onDataSend);
     esp_now_register_recv_cb(onDataRecv);
 
     // Register peer
-    esp_now_add_peer(sendTo, ESP_NOW_ROLE_SLAVE, 1, NULL, 0);
+    esp_now_add_peer(sendTo, ESP_NOW_ROLE_COMBO, 1, NULL, 0);
 #endif
 
     return true;  // If all things operate successfully
@@ -199,21 +199,21 @@ bool wifiServer::wifi_send(uint8_t num, const char *payload, bool cleanMsg)
 
 bool wifiServer::wifi_broadcast(String payload, bool cleanMsg)
 {
-#ifdef USE_WIFI_COMMUNICATION
-    bool success = webSocket.broadcastTXT(payload);
-    if (success && cleanMsg)
-        message = "";
-    return success;
-#endif
+    return this->wifi_broadcast(payload.c_str(), cleanMsg);
 }
+
 bool wifiServer::wifi_broadcast(const char *payload, bool cleanMsg)
 {
+    bool success = false;
 #ifdef USE_WIFI_COMMUNICATION
-    bool success = webSocket.broadcastTXT(payload);
+    success |= webSocket.broadcastTXT(payload);
+#endif
+#ifdef ESP_NOW
+    success |= esp_now_send(sendTo, (u8 *) payload, sizeof(payload));
+#endif
     if (success && cleanMsg)
         message = "";
     return success;
-#endif
 }
 
 void wifiServer::loop()
