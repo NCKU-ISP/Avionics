@@ -61,7 +61,7 @@ public:
     bool wifi_send(uint8_t num, String payload, bool cleanMsg = true);
     bool wifi_send(uint8_t num, const char *payload, bool cleanMsg = true);
 
-    bool wifi_broadcast(String payload, bool cleanMsg = true);
+    bool wifi_broadcast(const String &payload, bool cleanMsg = true);
     bool wifi_broadcast(const char *payload, bool cleanMsg = true);
 
     void loop();  // Put this loop to core loop()

@@ -197,9 +197,9 @@ bool wifiServer::wifi_send(uint8_t num, const char *payload, bool cleanMsg)
 #endif
 }
 
-bool wifiServer::wifi_broadcast(String payload, bool cleanMsg)
+bool wifiServer::wifi_broadcast(const String &payload, bool cleanMsg)
 {
-    return this->wifi_broadcast(payload.c_str(), cleanMsg);
+    return wifi_broadcast(payload.c_str(), cleanMsg);
 }
 
 bool wifiServer::wifi_broadcast(const char *payload, bool cleanMsg)
