@@ -209,7 +209,7 @@ bool wifiServer::wifi_broadcast(const char *payload, bool cleanMsg)
     success |= webSocket.broadcastTXT(payload);
 #endif
 #ifdef ESP_NOW
-    success |= esp_now_send(sendTo, (u8 *) payload, sizeof(payload));
+    success |= esp_now_send(NULL, (u8 *) payload, sizeof(payload));
 #endif
     if (success && cleanMsg)
         message = "";
