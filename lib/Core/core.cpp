@@ -510,9 +510,9 @@ bool System::command(String cmd, CMD_TYPE type)
 
     else if (cmd == "rocket") {
         msg += "state: " + String(rocket.state) + '\n';
-        msg += "fairing: " + (rocket.fairing ? "open" : "closed") + "\n";
+        msg += "fairing: " + String(rocket.fairing ? "open" : "closed") + "\n";
         msg += "fairing type: " +
-               ((rocket.ftype == F_TRIGGER) ? "trigger" : "servo") + "\n";
+               String((rocket.ftype == F_TRIGGER) ? "trigger" : "servo") + "\n";
         msg += "comms state: " + String(rocket.cState);
         msg += "release at " + String(release_t) + "ms\n";
         msg += "stop at " + String(stop_t) + "ms\n";
