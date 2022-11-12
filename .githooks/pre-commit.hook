@@ -26,8 +26,8 @@ FILES=`git diff --cached --name-only --diff-filter=ACMR | grep -E "\.(c|cpp|h)$"
 for FILE in $FILES; do
     nf=`git checkout-index --temp $FILE | cut -f 1`
     newfile=`mktemp /tmp/${nf}.XXXXXX` || exit 1
-    $CLANG_FORMAT $CLANG_FORMAT_OPTS $nf > $newfile 2>> /dev/null
-    $DIFF -u -p -B  "${nf}" "${newfile}"
+    $CLANG_FORMAT $CLANG_FORMAT_OPTS $FILE > $newfile 2>> /dev/null
+    $DIFF -u -p -B  "${FILE}" "${newfile}"
     r=$?
     rm "${newfile}"
     rm "${nf}"
