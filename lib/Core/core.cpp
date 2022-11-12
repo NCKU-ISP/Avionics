@@ -191,6 +191,13 @@ void System::loop()
         command(core_cmd, CMD_BOTH);
         core_cmd = "";
     }
+#ifdef ESP_NOW
+    const char *esp_now_msg = fetchESPNOWMessage();
+    if (esp_now_msg) {
+        command(esp_now_msg, CMD_BOTH);
+        clearESPNOWMessage();
+    }
+#endif
     // servo.write(180);
 
     imu.bmp_update();
@@ -503,9 +510,9 @@ bool System::command(String cmd, CMD_TYPE type)
 
     else if (cmd == "rocket") {
         msg += "state: " + String(rocket.state) + '\n';
-        msg += "fairing: " + rocket.fairing ? "open" : "closed" + '\n';
-        msg += "fairing type: " + (rocket.ftype == F_TRIGGER) ? "trigger"
-                                                              : "servo" + '\n';
+        msg += "fairing: " + (rocket.fairing ? "open" : "closed") + "\n";
+        msg += "fairing type: " +
+               ((rocket.ftype == F_TRIGGER) ? "trigger" : "servo") + "\n";
         msg += "comms state: " + String(rocket.cState);
         msg += "release at " + String(release_t) + "ms\n";
         msg += "stop at " + String(stop_t) + "ms\n";

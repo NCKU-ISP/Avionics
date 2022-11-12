@@ -23,10 +23,8 @@
 #include <WebSocketsServer.h>
 #ifdef ESP_NOW
 #include <espnow.h>
-typedef struct payload_t {
-    char message[256];
-} payload_t;
-
+const char *fetchESPNOWMessage();
+void clearESPNOWMessage();
 void onDataSend(uint8_t *mac_addr, uint8_t status);
 void onDataRecv(uint8_t *mac_addr, uint8_t *payload, uint8_t length);
 #endif
