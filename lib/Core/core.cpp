@@ -181,8 +181,12 @@ void System::loop()
             Serial.print((char) c);
             serial_cmd += (char) c;
         } else {
-            keep = command(serial_cmd, CMD_SERIAL);
+#ifdef ESP_NOW_AGENT
+            serial_cmd += "\n";
             comms.wifi_broadcast(serial_cmd);
+#else
+            keep = command(serial_cmd, CMD_SERIAL);
+#endif
             if (!keep)
                 serial_cmd = "";
         }
@@ -192,9 +196,16 @@ void System::loop()
         core_cmd = "";
     }
 #ifdef ESP_NOW
-    const char *esp_now_msg = fetchESPNOWMessage();
+    char *esp_now_msg = fetchESPNOWMessage();
     if (esp_now_msg) {
+#ifdef ESP_NOW_AGENT
+        Serial.print(">>>");
+        Serial.println(esp_now_msg);
+#else
+        Serial.printf("Fetch: %s\n", esp_now_msg);
+        esp_now_msg[strlen(esp_now_msg) - 1] = 0;
         command(esp_now_msg, CMD_BOTH);
+#endif
         clearESPNOWMessage();
     }
 #endif
@@ -546,8 +557,9 @@ bool System::command(String cmd, CMD_TYPE type)
 
     // Print out msg through serial or wifi
     if (msg != "") {
+        msg += "\n";
         if (type == CMD_SERIAL || type == CMD_BOTH)
-            Serial.println(msg);
+            Serial.print(msg);
         if (type == CMD_WIFI)
             comms.wifi_broadcast(msg, !keep);
         if (type == CMD_BOTH)

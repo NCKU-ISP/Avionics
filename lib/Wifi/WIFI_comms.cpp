@@ -216,7 +216,13 @@ bool wifiServer::wifi_broadcast(const char *payload, bool cleanMsg)
     success |= webSocket.broadcastTXT(payload);
 #endif
 #ifdef ESP_NOW
-    success |= esp_now_send(sendTo, (u8 *) payload, strlen(payload) + 1);
+    const size_t max_size = 200;
+    size_t partition = strlen(payload) / max_size + 1;
+    for (size_t i = 0; i < partition; i++) {
+        success |= esp_now_send(
+            sendTo, (u8 *) payload + (max_size * i),
+            i == partition - 1 ? (strlen(payload) % max_size) : max_size);
+    }
 #endif
     if (success && cleanMsg)
         message = "";
@@ -231,7 +237,7 @@ void wifiServer::loop()
 }
 
 #ifdef ESP_NOW
-static char message[256] = {0};
+static char message[2048] = {0};
 void onDataSend(uint8_t *mac_addr, uint8_t status)
 {
     if (status)
@@ -240,14 +246,16 @@ void onDataSend(uint8_t *mac_addr, uint8_t status)
 
 void onDataRecv(uint8_t *mac_addr, uint8_t *payload, uint8_t length)
 {
-    Serial.printf("ESP-NOW: %s\n", payload);
-    memcpy(&message, payload, length);
-    message[length] = 0;
+    payload[length] = 0;
+    strcat(message, (char *) payload);
 }
 
-const char *fetchESPNOWMessage()
+char *fetchESPNOWMessage()
 {
-    if (message[strlen(message) - 1] == '\n')
+    // end of command
+    static uint8_t EOC;
+    EOC = message[strlen(message) - 1] == '\n';
+    if (EOC)
         return message;
     else
         return NULL;
