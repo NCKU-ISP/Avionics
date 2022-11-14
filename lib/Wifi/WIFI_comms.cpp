@@ -1,15 +1,15 @@
 #include "WIFI_comms.h"
 #ifdef USE_WIFI_COMMUNICATION
 
-payload_t data;
-// uint8_t sendTo[] = {0xE8, 0xDB, 0x84, 0x94, 0x6B, 0x78};
-uint8_t sendTo[] = {0xBC, 0xFF, 0x4D, 0x18, 0xF5, 0xF6};
+// ESP-NOW broadcast address
+static uint8_t sendTo[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 wifiServer::wifiServer() : server(80), webSocket(81), message(""), dB(0) {}
 
 bool wifiServer::init(const char *ssid /*=WIFI_SSID*/,
                       const char *passward /*=WIFI_PASSWARD*/)
 {
+#ifndef ESP_NOW
 #ifdef AP_AS_SERVER      // Access point as server (Sky recommanded)
     WiFi.mode(WIFI_AP);  // Set access point ssid and passward
     if (!WiFi.softAP(ssid, passward)) {
@@ -26,6 +26,9 @@ bool wifiServer::init(const char *ssid /*=WIFI_SSID*/,
         Serial.println("Set ssid and passward failed");
         return false;
     }
+#endif
+#else
+    WiFi.mode(WIFI_STA);
 #endif
     Serial.println(String("MAC Address: ") + WiFi.macAddress());
 
@@ -59,11 +62,15 @@ bool wifiServer::init(const char *ssid /*=WIFI_SSID*/,
     }
     // Once ESPNow is successfully Init, we will register for Send CB to
     // get the status of Trasnmitted packet
+    esp_now_set_self_role(ESP_NOW_ROLE_COMBO);
     esp_now_register_send_cb(onDataSend);
     esp_now_register_recv_cb(onDataRecv);
 
     // Register peer
-    esp_now_add_peer(sendTo, ESP_NOW_ROLE_COMBO, 1, NULL, 0);
+    if (esp_now_add_peer(sendTo, ESP_NOW_ROLE_COMBO, 1, NULL, 0)) {
+        Serial.printf("Error ESP-NOW add peer %d\n");
+        return false;
+    }
 #endif
 
     return true;  // If all things operate successfully
@@ -197,9 +204,9 @@ bool wifiServer::wifi_send(uint8_t num, const char *payload, bool cleanMsg)
 #endif
 }
 
-bool wifiServer::wifi_broadcast(String payload, bool cleanMsg)
+bool wifiServer::wifi_broadcast(const String &payload, bool cleanMsg)
 {
-    return this->wifi_broadcast(payload.c_str(), cleanMsg);
+    return wifi_broadcast(payload.c_str(), cleanMsg);
 }
 
 bool wifiServer::wifi_broadcast(const char *payload, bool cleanMsg)
@@ -209,7 +216,13 @@ bool wifiServer::wifi_broadcast(const char *payload, bool cleanMsg)
     success |= webSocket.broadcastTXT(payload);
 #endif
 #ifdef ESP_NOW
-    success |= esp_now_send(sendTo, (u8 *) payload, sizeof(payload));
+    const size_t max_size = 200;
+    size_t partition = strlen(payload) / max_size + 1;
+    for (size_t i = 0; i < partition; i++) {
+        success |= esp_now_send(
+            sendTo, (u8 *) payload + (max_size * i),
+            i == partition - 1 ? (strlen(payload) % max_size) : max_size);
+    }
 #endif
     if (success && cleanMsg)
         message = "";
@@ -224,24 +237,33 @@ void wifiServer::loop()
 }
 
 #ifdef ESP_NOW
+static char message[2048] = {0};
 void onDataSend(uint8_t *mac_addr, uint8_t status)
 {
-    Serial.print("Last Packet Send Status: ");
-    if (status == 0) {
-        Serial.println("Delivery success");
-    } else {
-        Serial.println("Delivery fail");
-    }
+    if (status)
+        Serial.println("ESP-NOW: Delivery fail");
 }
 
 void onDataRecv(uint8_t *mac_addr, uint8_t *payload, uint8_t length)
 {
-    memcpy(&data, payload, sizeof(data));
-    Serial.print("Bytes received: ");
-    Serial.println(length);
-    Serial.print("Char: ");
-    Serial.println(data.message);
-    Serial.println();
+    payload[length] = 0;
+    strcat(message, (char *) payload);
+}
+
+char *fetchESPNOWMessage()
+{
+    // end of command
+    static uint8_t EOC;
+    EOC = message[strlen(message) - 1] == '\n';
+    if (EOC)
+        return message;
+    else
+        return NULL;
+}
+
+void clearESPNOWMessage()
+{
+    message[0] = 0;
 }
 #endif
 

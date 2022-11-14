@@ -11,8 +11,17 @@
 // #define V3_PIONEER
 
 /*--------------- System function enable ---------------*/
-// #define USE_SERIAL_DEBUGGER
-// #define USE_SERIAL_COMMS
+#define USE_SERIAL_DEBUGGER
+#define USE_SERIAL_COMMS
+// #define ESP_NOW_AGENT
+#ifdef ESP_NOW_AGENT
+#ifndef USE_SERIAL_DEBUGGER
+#define USE_SERIAL_DEBUGGER
+#endif
+#ifndef USE_SERIAL_COMMS
+#define USE_SERIAL_COMMS
+#endif
+#endif
 // #define USE_GPS_NEO6M
 #define USE_PERIPHERAL_BMP280
 // #define USE_PERIPHERAL_BMP280_LIB

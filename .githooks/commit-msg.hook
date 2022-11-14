@@ -146,12 +146,6 @@ validate_commit_message() {
   test "${#COMMIT_SUBJECT}" -le 50
   test $? -eq 0 || add_warning 1 "Limit the subject line to 50 characters (${#COMMIT_SUBJECT} chars)"
 
-  # 3. Capitalize the subject line
-  # ------------------------------------------------------------------------------
-
-  [[ ${COMMIT_SUBJECT} =~ ^[[:blank:]]*([[:upper:]]{1}[[:lower:]]*|[[:digit:]]+)([[:blank:]]|[[:punct:]]|$) ]]
-  test $? -eq 0 || add_warning 1 "Capitalize the subject line"
-
   # 4. Do not end the subject line with a period
   # ------------------------------------------------------------------------------
 
