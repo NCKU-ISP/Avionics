@@ -39,10 +39,11 @@ enum FAIRING_TYPE { F_SERVO, F_TRIGGER };
 enum COMMS_STATE { WIFI_DISCONNECTED, WIFI_CONNECTED };
 typedef struct rocket_status {
     ROCKET_STATE state;
-    bool fairing;
+    bool fairingOpened;
     FAIRING_TYPE ftype;
     COMMS_STATE cState;
     BUZZER_LEVEL buzzState;
+    bool liftoff;
 } ROC_STATE;
 
 #define TIMER_PRESCALER_1 0x01
@@ -67,6 +68,8 @@ private:
     Ticker fly_plan;
     Ticker log;
     Ticker stream;
+    Ticker count_down;
+    Ticker fire;
 
     String data = "";
 
@@ -92,11 +95,11 @@ private:
 public:
     SYSTEM_STATE state;
     ROC_STATE rocket = {.state = ROCKET_READY,
-                        .fairing = false,
+                        .fairingOpened = false,
                         .ftype = F_SERVO,
                         .buzzState = BUZ_LEVEL1};
     Logger logger;
-    IMU imu;
+    SENSOR imu;
 #ifdef USE_WIFI_COMMUNICATION
     wifiServer comms;
 #endif

@@ -11,8 +11,8 @@
 #ifndef _LOGGER_H
 #define _LOGGER_H
 
+#include <../../include/configs.h>
 #include <Arduino.h>
-#include "../../include/configs.h"
 #ifdef USE_PERIPHERAL_SD_CARD
 #include <SD.h>
 #include <SPI.h>
@@ -78,6 +78,7 @@ public:
 
     /* Perform logging task */
     void log(String msg, LOG_LEVEL level = LEVEL_DEBUG);
+    void log_data(uint8_t *data, size_t length, LOG_LEVEL level);
 
     /* Log existing error code or info code */
     void log_code(int code, LOG_LEVEL level);
