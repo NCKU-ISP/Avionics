@@ -11,13 +11,22 @@
 // #define V3_PIONEER
 
 /*--------------- System function enable ---------------*/
-// #define USE_SERIAL_DEBUGGER
-// #define USE_SERIAL_COMMS
+#define USE_SERIAL_DEBUGGER
+#define USE_SERIAL_COMMS
+// #define ESP_NOW_AGENT
+#ifdef ESP_NOW_AGENT
+#ifndef USE_SERIAL_DEBUGGER
+#define USE_SERIAL_DEBUGGER
+#endif
+#ifndef USE_SERIAL_COMMS
+#define USE_SERIAL_COMMS
+#endif
+#endif
 // #define USE_GPS_NEO6M
 #define USE_PERIPHERAL_BMP280
 // #define USE_PERIPHERAL_BMP280_LIB
-// #define USE_PERIPHERAL_MPU6050
-// #define USE_GY91_MPU9250
+//#define USE_PERIPHERAL_MPU6050
+#define USE_GY91_MPU9250
 #define USE_PERIPHERAL_BUZZER
 
 // #define LAUNCH_TRIGGER
@@ -239,6 +248,8 @@ enum INFO_CODE {
 };
 
 #define LIFT_OFF_PROTECT_TIME 3000
+#define IMU_FALLING_CRITERIA -0.4f
+#define IMU_LIFT_OFF_DETECTION_G 2.5f
 
 #endif
 

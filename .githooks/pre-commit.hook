@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CLANG_FORMAT_OPTS=""
-CPPCHECK_OPTS="-I. --error-exitcode=1 ."
+CPPCHECK_OPTS="-j4 --error-exitcode=1 --language=c++"
 
 RETURN=0
 CLANG_FORMAT=$(which clang-format)
@@ -26,8 +26,8 @@ FILES=`git diff --cached --name-only --diff-filter=ACMR | grep -E "\.(c|cpp|h)$"
 for FILE in $FILES; do
     nf=`git checkout-index --temp $FILE | cut -f 1`
     newfile=`mktemp /tmp/${nf}.XXXXXX` || exit 1
-    $CLANG_FORMAT $CLANG_FORMAT_OPTS $nf > $newfile 2>> /dev/null
-    $DIFF -u -p -B  "${nf}" "${newfile}"
+    $CLANG_FORMAT $CLANG_FORMAT_OPTS $FILE > $newfile 2>> /dev/null
+    $DIFF -u -p -B  "${FILE}" "${newfile}"
     r=$?
     rm "${newfile}"
     rm "${nf}"
@@ -45,12 +45,14 @@ if [ $RETURN -eq 1 ]; then
 fi
 
 # static analysis
-$CPPCHECK $CPPCHECK_OPTS >/dev/null
-if [ $? -ne 0 ]; then
-    RETURN=1
-    echo "" >&2
-    echo "Fail to pass static analysis." >&2
-    echo
-fi
+for FILE in $FILES; do
+  $CPPCHECK $CPPCHECK_OPTS $FILE >/dev/null
+  if [ $? -ne 0 ]; then
+      RETURN=1
+      echo "" >&2
+      echo "Fail to pass static analysis." >&2
+      echo
+  fi
+done
 
 exit $RETURN

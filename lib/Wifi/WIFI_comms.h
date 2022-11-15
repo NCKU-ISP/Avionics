@@ -23,10 +23,8 @@
 #include <WebSocketsServer.h>
 #ifdef ESP_NOW
 #include <espnow.h>
-typedef struct payload_t {
-    char message[256];
-} payload_t;
-
+char *fetchESPNOWMessage();
+void clearESPNOWMessage();
 void onDataSend(uint8_t *mac_addr, uint8_t status);
 void onDataRecv(uint8_t *mac_addr, uint8_t *payload, uint8_t length);
 #endif
@@ -61,7 +59,7 @@ public:
     bool wifi_send(uint8_t num, String payload, bool cleanMsg = true);
     bool wifi_send(uint8_t num, const char *payload, bool cleanMsg = true);
 
-    bool wifi_broadcast(String payload, bool cleanMsg = true);
+    bool wifi_broadcast(const String &payload, bool cleanMsg = true);
     bool wifi_broadcast(const char *payload, bool cleanMsg = true);
 
     void loop();  // Put this loop to core loop()

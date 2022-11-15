@@ -3,10 +3,10 @@
 Logger::Logger()
     :
 #ifdef USE_LORA_COMMUNICATION
-      lora(PIN_LORA_SELECT,    // Port-Pin Output: SPI select
-           PIN_LORA_RESET,     // Port-Pin Output: Reset
-           PIN_LORA_BUSY,      // Port-Pin Input:  Busy
-           PIN_LORA_INTERRUPT  // Port-Pin Input:  Interrupt DIO1
+      lora(PIN_LORA_SELECT,   // Port-Pin Output: SPI select
+           PIN_LORA_RESET,    // Port-Pin Output: Reset
+           PIN_LORA_BUSY,     // Port-Pin Input:  Busy
+           PIN_LORA_INTERRUPT // Port-Pin Input:  Interrupt DIO1
            ),
 #endif
 #ifdef LITTLE_FS
@@ -14,15 +14,13 @@ Logger::Logger()
 #else
       filesystem(&SPIFFS),
 #endif
-      used(true)
-{
+      used(true) {
 #ifdef USE_LORA_COMMUNICATION
     lora_packet_id = 0;
 #endif
 }
 
-bool Logger::init()
-{
+bool Logger::init() {
 #ifdef USE_SERIAL_DEBUGGER
     Serial.begin(SERIAL_DEBUGGER_BAUDRATE);
 #endif
@@ -54,23 +52,21 @@ bool Logger::init()
     return true;
 }
 
-void Logger::lora_init()
-{
+void Logger::lora_init() {
 #ifdef USE_LORA_COMMUNICATION
-    lora.begin(SX126X_PACKET_TYPE_LORA,  // LoRa or FSK, FSK
+    lora.begin(SX126X_PACKET_TYPE_LORA, // LoRa or FSK, FSK
                                          // currently not supported
-               RF_FREQUENCY,             // frequency in Hz
-               -3);                      // tx power in dBm
+               RF_FREQUENCY,            // frequency in Hz
+               -3);                     // tx power in dBm
 
     lora.LoRaConfig(LORA_SPREADING_FACTOR, LORA_BANDWIDTH, LORA_CODINGRATE,
                     LORA_PREAMBLE_LENGTH, LORA_PAYLOADLENGTH,
-                    false,   // crcOn
-                    false);  // invertIrq
+                    false,  // crcOn
+                    false); // invertIrq
 #endif
 }
 
-void Logger::log(String msg, LOG_LEVEL level)
-{
+void Logger::log(String msg, LOG_LEVEL level) {
     // Adding prefix message
     String prefix = "";
     // switch (level) {
@@ -115,15 +111,40 @@ void Logger::log(String msg, LOG_LEVEL level)
 #endif
 }
 
-void Logger::log_code(int code, LOG_LEVEL level)
-{
-    log(String(code), level);
+void Logger::log_data(uint8_t *data, size_t length, LOG_LEVEL level) {
+
+#ifdef USE_PERIPHERAL_SD_CARD
+    // Create file if it is not exist
+    File sd;
+    sd = SD.open(file_ext, FILE_WRITE);
+    if (sd) {
+        sd.println(prefix + msg);
+        sd.close();
+    }
+#elif defined(USE_FILE_SYSTEM)
+    // Open for appending (writing at end of file).
+    // The file is created if it does not exist.
+    // The stream is positioned at the end of the file.
+    if (level != LEVEL_FLIGHT)
+        f = filesystem->open(file_ext, "a");
+    if (!f) {
+        Serial.println("Failed to open file for appending");
+        return;
+    }
+    f.write(data, length);
+    f.println();
+#endif
+
+#ifdef USE_SERIAL_DEBUGGER
+//    Serial.println(prefix + msg);
+#endif
 }
+
+void Logger::log_code(int code, LOG_LEVEL level) { log(String(code), level); }
 
 #ifdef USE_FILE_SYSTEM
 
-void Logger::newFile(LOG_LEVEL level)
-{
+void Logger::newFile(LOG_LEVEL level) {
     // Check whether the filename is unique
     String fileName = LOGGER_FILENAME;
     String extension = LOGGER_FILE_EXT;
@@ -134,14 +155,12 @@ void Logger::newFile(LOG_LEVEL level)
         f = filesystem->open(file_ext, "a");
 }
 
-void Logger::appendFile(String path)
-{
+void Logger::appendFile(String path) {
     // Open an existing file to append
     f = filesystem->open(path, "a");
 }
 
-String Logger::listFile(String path)
-{
+String Logger::listFile(String path) {
     // Assuming there are no subdirectories
     Dir dir = filesystem->openDir(path);
     String output = "[";
@@ -158,8 +177,7 @@ String Logger::listFile(String path)
     return output;
 }
 
-bool Logger::deleteFile(const char *fileName)
-{
+bool Logger::deleteFile(const char *fileName) {
     // Serial.printf("Deleting file: %s\n", fileName);
     if (LittleFS.remove(String("/") + fileName)) {
         return true;
@@ -167,13 +185,11 @@ bool Logger::deleteFile(const char *fileName)
         return false;
     }
 }
-bool Logger::deleteFile(String fileName)
-{
+bool Logger::deleteFile(String fileName) {
     return deleteFile(fileName.c_str());
 }
 
-String Logger::clearDataFile()
-{
+String Logger::clearDataFile() {
     String fileName = LOGGER_FILENAME;
     String extension = LOGGER_FILE_EXT;
     String file_del = fileName + extension;
@@ -187,16 +203,14 @@ String Logger::clearDataFile()
     return feedback;
 }
 
-bool Logger::formatFS()
-{
+bool Logger::formatFS() {
     bool success = filesystem->format();
     // if (success) Serial.println("Formatted");
     // else Serial.println("Formt failed");
     return success;
 }
 
-String Logger::readFile(const char *fileName, int *pos)
-{
+String Logger::readFile(const char *fileName, int *pos) {
     File f = filesystem->open(String("/") + fileName, "r");
     if (!f) {
         *pos = -1;
@@ -206,7 +220,7 @@ String Logger::readFile(const char *fileName, int *pos)
     int counter = 0;
     f.seek(*pos, SeekSet);
     while (f.available()) {
-        char in = (char) f.read();
+        char in = (char)f.read();
         if (counter >= 1000 && in == '\n') {
             *pos += counter;
             break;
@@ -221,13 +235,11 @@ String Logger::readFile(const char *fileName, int *pos)
     return index;
 }
 
-String Logger::readFile(String fileName, int *pos)
-{
+String Logger::readFile(String fileName, int *pos) {
     return readFile(fileName.c_str(), pos);
 }
 
-String Logger::fsInfo()
-{
+String Logger::fsInfo() {
     filesystem->info(fs_info);
     String info = "FileSystem Info:\n";
     info += String("totalBytes: ") + fs_info.totalBytes + '\n';
@@ -239,8 +251,7 @@ String Logger::fsInfo()
     return info;
 }
 
-String Logger::remainSpace()
-{
+String Logger::remainSpace() {
     filesystem->info(fs_info);
     int space = fs_info.totalBytes - fs_info.usedBytes;
     float percent = 100 * space / fs_info.totalBytes;
@@ -251,8 +262,7 @@ String Logger::remainSpace()
 #endif
 
 #ifdef USE_LORA_COMMUNICATION
-void Logger::lora_send(LOG_LORA_MODE mode, int16_t *data)
-{
+void Logger::lora_send(LOG_LORA_MODE mode, int16_t *data) {
     packet.Packet.id = mode << 12 | lora_packet_id;
     memcpy(packet.Packet.data, data, sizeof(int16_t) * 3);
 

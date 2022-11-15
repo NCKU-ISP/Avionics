@@ -52,7 +52,7 @@ System::System()
 SYSTEM_STATE System::init(bool soft_init)
 {
     rocket = {.state = ROCKET_READY,
-              .fairing = false,
+              .fairingOpened = false,
               .ftype = F_SERVO,
               .buzzState = BUZ_LEVEL1};
 
@@ -81,6 +81,7 @@ SYSTEM_STATE System::init(bool soft_init)
         digitalWrite(PIN_BUZZER, 1);
     } else {
         Serial.println("imu initialized success");
+        comms.wifi_broadcast("imu initialized success\n");
     }
     // // logger.log_info(INFO_IMU_INIT);
     // // logger.log_code(INFO_IMU_INIT, LEVEL_INFO);
@@ -181,8 +182,12 @@ void System::loop()
             Serial.print((char) c);
             serial_cmd += (char) c;
         } else {
-            keep = command(serial_cmd, CMD_SERIAL);
+#ifdef ESP_NOW_AGENT
+            serial_cmd += "\n";
             comms.wifi_broadcast(serial_cmd);
+#else
+            keep = command(serial_cmd, CMD_SERIAL);
+#endif
             if (!keep)
                 serial_cmd = "";
         }
@@ -191,9 +196,23 @@ void System::loop()
         command(core_cmd, CMD_BOTH);
         core_cmd = "";
     }
+#ifdef ESP_NOW
+    char *esp_now_msg = fetchESPNOWMessage();
+    if (esp_now_msg) {
+#ifdef ESP_NOW_AGENT
+        Serial.print(">>>");
+        Serial.println(esp_now_msg);
+#else
+        Serial.printf("Fetch: %s\n", esp_now_msg);
+        esp_now_msg[strlen(esp_now_msg) - 1] = 0;
+        command(esp_now_msg, CMD_BOTH);
+#endif
+        clearESPNOWMessage();
+    }
+#endif
     // servo.write(180);
 
-    imu.bmp_update();
+    imu.update();
 
     flight();
 
@@ -314,7 +333,7 @@ void System::fairing(int angle)
 #elif defined(PARACHUTE_TRIGGER)
     trig(PIN_TRIGGER_2, on_off);
 #endif
-    rocket.fairing = on_off;
+    rocket.fairingOpened = on_off;
 
     rocket.buzzState = buzz(BUZ_LEVEL4);
 }
@@ -352,7 +371,7 @@ bool System::command(String cmd, CMD_TYPE type)
     // Fairing command
     if (cmd == "open") {
         fairing(openAngle);
-        msg = "open fairing done";
+        msg = "open fairingOpened done";
         if (rocket.state == ROCKET_OFFGROUND) {
             logger.log("open", LEVEL_FLIGHT);
             logger.f.close();
@@ -360,17 +379,17 @@ bool System::command(String cmd, CMD_TYPE type)
         }
     } else if (cmd == "close") {
         fairing(closeAngle);
-        msg = "close fairing done";
-    } else if (cmd.substring(0, 11) == "set fairing") {
-        // cmd:set fairing (open angle) (close angle), ex: set fairing 10 100
+        msg = "close fairingOpened done";
+    } else if (cmd.substring(0, 11) == "set fairingOpened") {
+        // cmd:set fairingOpened (open angle) (close angle), ex: set fairingOpened 10 100
         String degree = cmd.substring(12);
         int open = degree.substring(0, degree.indexOf(' ')).toInt();
         int close = degree.substring(degree.indexOf(' ')).toInt();
         if (open > 180 || open < 0 || close > 180 || close < 0) {
-            msg = "set fairing failed : angle out of limit, must 0~180";
+            msg = "set fairingOpened failed : angle out of limit, must 0~180";
         } else {
             setFairingLimit(close, open);
-            msg = "set fairing done";
+            msg = "set fairingOpened done";
         }
     } else if (cmd == "detach") {
         servoOff();
@@ -503,9 +522,9 @@ bool System::command(String cmd, CMD_TYPE type)
 
     else if (cmd == "rocket") {
         msg += "state: " + String(rocket.state) + '\n';
-        msg += "fairing: " + rocket.fairing ? "open" : "closed" + '\n';
-        msg += "fairing type: " + (rocket.ftype == F_TRIGGER) ? "trigger"
-                                                              : "servo" + '\n';
+        msg += "fairingOpened: " + String(rocket.fairingOpened ? "open" : "closed") + "\n";
+        msg += "fairingOpened type: " +
+               String((rocket.ftype == F_TRIGGER) ? "trigger" : "servo") + "\n";
         msg += "comms state: " + String(rocket.cState);
         msg += "release at " + String(release_t) + "ms\n";
         msg += "stop at " + String(stop_t) + "ms\n";
@@ -539,8 +558,9 @@ bool System::command(String cmd, CMD_TYPE type)
 
     // Print out msg through serial or wifi
     if (msg != "") {
+        msg += "\n";
         if (type == CMD_SERIAL || type == CMD_BOTH)
-            Serial.println(msg);
+            Serial.print(msg);
         if (type == CMD_WIFI)
             comms.wifi_broadcast(msg, !keep);
         if (type == CMD_BOTH)
@@ -550,48 +570,91 @@ bool System::command(String cmd, CMD_TYPE type)
     return keep;
 }
 
+
 void System::flight()
 {
-    float height = 0, speed = 0;
-    String data_head;
+    float height = 0, speed = 0, height_est;
+    uint8_t data[53];
+    String data_str;
+    char data_head;
 #ifdef USE_PERIPHERAL_BMP280
-    height = imu.est_altitude;
-    speed = imu.velocity;
+    height = imu.getBmpAltitude();
+    height_est = imu.altitude_estimate;
+    speed = imu.velocity_estimate;
 #endif
-    static auto T_start = -1;
-    if (rocket.state == ROCKET_OFFGROUND) {
+    static unsigned long T_start = -1;
+    unsigned long T_plus;
+    if (rocket.state == ROCKET_OFFGROUND)
+    {
+        if(!rocket.liftoff)
+        {
+            float ACC = (fabs(imu.acc.x) + fabs(imu.acc.y) + fabs(imu.acc.z)) / 3;
+            Serial.println(ACC);
+            if(ACC > IMU_LIFT_OFF_DETECTION_G) {
+                Serial.println("Lift off");
+                rocket.liftoff = true;
+                fly_plan.once_ms(release_t, [=]()
+                                 {
+                                     core_cmd = "open";
+                                     fly_plan.detach();
+                                     fly_plan.once_ms(stop_t, [=]() {
+                                         rocket.buzzState = buzz(BUZ_LEVEL3);
+                                         core_cmd = "stop";
+                                     }); });
+            }
+        }
+
         if (T_start == -1)
             T_start = millis();
-        auto T_now = millis();
-        auto T_plus = T_now - T_start;
-        data_head = String("f,") + T_plus;
+        unsigned long T_now = millis();
+        T_plus = T_now - T_start;
+        data_head = 'f';
 
-        if (imu.pose == ROCKET_FALLING && !rocket.fairing &&
-            T_plus > LIFT_OFF_PROTECT_TIME) {
-            // fairing(openAngle);
+        if (imu.pose == ROCKET_FALLING && !rocket.fairingOpened &&
+            T_plus > LIFT_OFF_PROTECT_TIME && rocket.liftoff)
+        {
+            // fairingOpened(openAngle);
             core_cmd = "open";
         }
-    } else {
-        data_head = String("s,0");
+    }
+    else
+    {
+        data_head = 's';
+        T_plus = 0;
     }
 
-    if (rocket.state == ROCKET_LANDED) {
+    if (rocket.state == ROCKET_LANDED)
+    {
         T_start = -1;
     }
 
     if (wait_log || wait_stream)
-        data = data_head + ',' + height + ',' + speed + ',' + imu.pose + ',' +
-               comms.dB + ',' + imu.altitude + ',' + imu.seaLevelHpa;
-    if (wait_log) {
-        logger.log(data, LEVEL_FLIGHT);
+    {
+        comms.dB = 0;
+        data_str = String(data_head) + ',' + T_plus + ',' +
+                   height + ',' + height_est + ',' + speed + ',' +
+                   imu.acc.x + ',' + imu.acc.y + ',' + imu.acc.z + ',' +
+                   imu.gyro.x + ',' + imu.gyro.y + ',' + imu.gyro.z + ',' +
+                   imu.mag.x + ',' + imu.mag.y + ',' + imu.mag.z + /*',' +
+                   imu.gps.x + imu.gps.y + ',' + imu.gps.z + ',' +
+                   comms.dB +*/
+                   '\n';
+    }
+    if (wait_log)
+    {
+        logger.log(data_str, LEVEL_FLIGHT);
+        logger.log_data(data, sizeof(data), LEVEL_FLIGHT);
         wait_log = false;
     }
-    if (wait_stream) {
-        command("print" + data, CMD_WIFI);
+    if (wait_stream)
+    {
+        comms.wifi_broadcast(data_str, false);
+        // comms.webSocket.broadcastBIN(data, sizeof(data));
         wait_stream = false;
     }
 
-    if (speed < -12 && height < 10) {
+    if (speed < -12 && height < 10)
+    {
         core_cmd = "stop";
     }
 }
