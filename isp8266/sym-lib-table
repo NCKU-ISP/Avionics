@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name IPS5306)(type Legacy)(uri ${KIPRJMOD}/IPS5306/IPS5306.lib)(options "")(descr ""))
+)
