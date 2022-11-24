@@ -13,17 +13,6 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-$Comp
-L Connector:USB_C_Plug P1
-U 1 1 638029CF
-P 1300 2050
-F 0 "P1" H 1500 550 50  0000 C CNN
-F 1 "USB_C_Plug" H 1650 450 50  0000 C CNN
-F 2 "" H 1450 2050 50  0001 C CNN
-F 3 "https://www.usb.org/sites/default/files/documents/usb_type-c.zip" H 1450 2050 50  0001 C CNN
-	1    1300 2050
-	1    0    0    -1  
-$EndComp
 Text GLabel 1900 1750 2    50   Input ~ 0
 D+
 Text GLabel 1900 1550 2    50   Input ~ 0
@@ -41,27 +30,6 @@ F 3 "" H 1300 3650 50  0001 C CNN
 	1    1300 3650
 	1    0    0    -1  
 $EndComp
-Connection ~ 1300 3650
-Wire Wire Line
-	1900 2050 1900 2150
-Connection ~ 1900 2150
-Wire Wire Line
-	1900 2150 1900 2350
-Connection ~ 1900 2350
-Wire Wire Line
-	1900 2350 1900 2450
-Connection ~ 1900 2450
-Wire Wire Line
-	1900 2450 1900 2650
-Connection ~ 1900 2650
-Wire Wire Line
-	1900 2650 1900 2750
-Connection ~ 1900 2750
-Wire Wire Line
-	1900 2750 1900 2950
-Connection ~ 1900 2950
-Wire Wire Line
-	1900 2950 1900 3050
 $Comp
 L Device:R_Small R1
 U 1 1 63811A2A
@@ -123,7 +91,6 @@ F 3 "" H 1900 3050 50  0001 C CNN
 	1    1900 3050
 	1    0    0    -1  
 $EndComp
-Connection ~ 1900 3050
 NoConn ~ 1900 3250
 NoConn ~ 1900 3350
 $Comp
@@ -1633,17 +1600,6 @@ F 3 "~" H 6900 4550 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:C_Small C1
-U 1 1 63C8D629
-P 950 4600
-F 0 "C1" H 1042 4646 50  0000 L CNN
-F 1 "100n" H 1042 4555 50  0000 L CNN
-F 2 "" H 950 4600 50  0001 C CNN
-F 3 "~" H 950 4600 50  0001 C CNN
-	1    950  4600
-	1    0    0    -1  
-$EndComp
-$Comp
 L power:GND #PWR01
 U 1 1 63C8E842
 P 950 4700
@@ -1658,4 +1614,54 @@ Wire Wire Line
 	1800 4350 950  4350
 Wire Wire Line
 	950  4350 950  4500
+$Comp
+L Device:C_Small C1
+U 1 1 63C8D629
+P 950 4600
+F 0 "C1" H 1042 4646 50  0000 L CNN
+F 1 "100n" H 1042 4555 50  0000 L CNN
+F 2 "" H 950 4600 50  0001 C CNN
+F 3 "~" H 950 4600 50  0001 C CNN
+	1    950  4600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:USB_C_Receptacle J?
+U 1 1 63C95E22
+P 1300 2050
+F 0 "J?" H 1407 3317 50  0000 C CNN
+F 1 "USB_C_Receptacle" H 1407 3226 50  0000 C CNN
+F 2 "" H 1450 2050 50  0001 C CNN
+F 3 "https://www.usb.org/sites/default/files/documents/usb_type-c.zip" H 1450 2050 50  0001 C CNN
+	1    1300 2050
+	1    0    0    -1  
+$EndComp
+Connection ~ 1300 3650
+Wire Wire Line
+	1900 2950 1900 3050
+Connection ~ 1900 3050
+Wire Wire Line
+	1900 2050 1900 2150
+Connection ~ 1900 2150
+Wire Wire Line
+	1900 2150 1900 2350
+Connection ~ 1900 2350
+Wire Wire Line
+	1900 2350 1900 2450
+Connection ~ 1900 2450
+Wire Wire Line
+	1900 2450 1900 2650
+Connection ~ 1900 2650
+Wire Wire Line
+	1900 2650 1900 2750
+Connection ~ 1900 2750
+Wire Wire Line
+	1900 2750 1900 2950
+Connection ~ 1900 2950
+Wire Wire Line
+	1900 2950 1900 3050
+Text GLabel 1900 1650 2    50   Input ~ 0
+D-
+Text GLabel 1900 1850 2    50   Input ~ 0
+D+
 $EndSCHEMATC
