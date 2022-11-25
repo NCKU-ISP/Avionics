@@ -108,12 +108,6 @@ F 3 "" H 9550 2400 50  0001 C CNN
 	1    9550 2400
 	1    0    0    -1  
 $EndComp
-NoConn ~ 8950 1700
-NoConn ~ 8950 1800
-NoConn ~ 8950 1900
-NoConn ~ 8950 2000
-NoConn ~ 8950 2100
-NoConn ~ 8950 2200
 NoConn ~ 8950 1500
 Text GLabel 10150 1500 2    50   Input ~ 0
 SDA
@@ -125,17 +119,6 @@ Text GLabel 10150 1900 2    50   Input ~ 0
 GPIO14
 Text GLabel 10150 1600 2    50   Input ~ 0
 SCL
-$Comp
-L RF_Module:ESP-12E U4
-U 1 1 637F3A80
-P 9550 1700
-F 0 "U4" H 9750 2550 50  0000 C CNN
-F 1 "ESP-12E" H 9850 2450 50  0000 C CNN
-F 2 "RF_Module:ESP-12E" H 9550 1700 50  0001 C CNN
-F 3 "http://wiki.ai-thinker.com/_media/esp8266/esp8266_series_modules_user_manual_v1.1.pdf" H 9200 1800 50  0001 C CNN
-	1    9550 1700
-	1    0    0    -1  
-$EndComp
 Text GLabel 10150 2000 2    50   Input ~ 0
 GPIO15
 Text GLabel 10150 1100 2    50   Input ~ 0
@@ -1740,14 +1723,25 @@ F 3 "~" H 8700 1200 50  0001 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L power:+BATT #PWR?
+L power:+BATT #PWR0106
 U 1 1 63A6D1A8
 P 10000 4500
-F 0 "#PWR?" H 10000 4350 50  0001 C CNN
+F 0 "#PWR0106" H 10000 4350 50  0001 C CNN
 F 1 "+BATT" H 10015 4673 50  0000 C CNN
 F 2 "" H 10000 4500 50  0001 C CNN
 F 3 "" H 10000 4500 50  0001 C CNN
 	1    10000 4500
 	-1   0    0    1   
+$EndComp
+$Comp
+L RF_Module:ESP-07 U4
+U 1 1 63A9E644
+P 9550 1700
+F 0 "U4" H 9550 2681 50  0000 C CNN
+F 1 "ESP-07" H 9550 2590 50  0000 C CNN
+F 2 "RF_Module:ESP-07" H 9550 1700 50  0001 C CNN
+F 3 "http://wiki.ai-thinker.com/_media/esp8266/esp8266_series_modules_user_manual_v1.1.pdf" H 9200 1800 50  0001 C CNN
+	1    9550 1700
+	1    0    0    -1  
 $EndComp
 $EndSCHEMATC
