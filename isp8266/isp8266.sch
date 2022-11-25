@@ -1267,7 +1267,7 @@ U 1 1 63C601E5
 P 6350 3200
 F 0 "J9" H 6430 3192 50  0000 L CNN
 F 1 "I2C" H 6430 3101 50  0000 L CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Horizontal" H 6350 3200 50  0001 C CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical" H 6350 3200 50  0001 C CNN
 F 3 "~" H 6350 3200 50  0001 C CNN
 	1    6350 3200
 	1    0    0    -1  
