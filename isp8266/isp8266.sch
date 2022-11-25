@@ -140,218 +140,6 @@ Text GLabel 10150 2000 2    50   Input ~ 0
 GPIO15
 Text GLabel 10150 1100 2    50   Input ~ 0
 IO0
-Wire Wire Line
-	7400 3100 7550 3100
-Wire Wire Line
-	7400 3400 7550 3400
-$Comp
-L Connector_Generic:Conn_01x04 J6
-U 1 1 639B558A
-P 7750 3200
-F 0 "J6" H 7830 3192 50  0000 L CNN
-F 1 "USART" H 7830 3101 50  0000 L CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical" H 7750 3200 50  0001 C CNN
-F 3 "~" H 7750 3200 50  0001 C CNN
-	1    7750 3200
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR031
-U 1 1 639B5596
-P 7400 3400
-F 0 "#PWR031" H 7400 3150 50  0001 C CNN
-F 1 "GND" H 7405 3227 50  0000 C CNN
-F 2 "" H 7400 3400 50  0001 C CNN
-F 3 "" H 7400 3400 50  0001 C CNN
-	1    7400 3400
-	1    0    0    -1  
-$EndComp
-Text GLabel 7550 3200 0    50   Input ~ 0
-RXD
-Text GLabel 7550 3300 0    50   Input ~ 0
-TXD
-$Comp
-L Device:R_Small R14
-U 1 1 63A70D76
-P 5600 5300
-F 0 "R14" V 5500 5300 50  0000 C CNN
-F 1 "1k" V 5700 5300 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 5600 5300 50  0001 C CNN
-F 3 "~" H 5600 5300 50  0001 C CNN
-	1    5600 5300
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R_Small R13
-U 1 1 63A56AFE
-P 5600 4600
-F 0 "R13" V 5500 4600 50  0000 C CNN
-F 1 "1k" V 5700 4600 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 5600 4600 50  0001 C CNN
-F 3 "~" H 5600 4600 50  0001 C CNN
-	1    5600 4600
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R_Small R9
-U 1 1 63A42555
-P 4600 4600
-F 0 "R9" V 4500 4600 50  0000 C CNN
-F 1 "1k" V 4700 4600 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 4600 4600 50  0001 C CNN
-F 3 "~" H 4600 4600 50  0001 C CNN
-	1    4600 4600
-	0    1    1    0   
-$EndComp
-$Comp
-L power:+5V #PWR017
-U 1 1 63A41FDB
-P 4700 4500
-F 0 "#PWR017" H 4700 4350 50  0001 C CNN
-F 1 "+5V" H 4715 4673 50  0000 C CNN
-F 2 "" H 4700 4500 50  0001 C CNN
-F 3 "" H 4700 4500 50  0001 C CNN
-	1    4700 4500
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:R_Small R10
-U 1 1 63A069BE
-P 4600 5300
-F 0 "R10" V 4500 5300 50  0000 C CNN
-F 1 "1k" V 4700 5300 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 4600 5300 50  0001 C CNN
-F 3 "~" H 4600 5300 50  0001 C CNN
-	1    4600 5300
-	0    1    1    0   
-$EndComp
-Text GLabel 4500 5300 0    50   Input ~ 0
-GPIO12
-$Comp
-L power:GND #PWR027
-U 1 1 63994EAB
-P 5700 5400
-F 0 "#PWR027" H 5700 5150 50  0001 C CNN
-F 1 "GND" H 5705 5227 50  0000 C CNN
-F 2 "" H 5700 5400 50  0001 C CNN
-F 3 "" H 5700 5400 50  0001 C CNN
-	1    5700 5400
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:+5V #PWR026
-U 1 1 63994EA5
-P 5700 5200
-F 0 "#PWR026" H 5700 5050 50  0001 C CNN
-F 1 "+5V" H 5715 5373 50  0000 C CNN
-F 2 "" H 5700 5200 50  0001 C CNN
-F 3 "" H 5700 5200 50  0001 C CNN
-	1    5700 5200
-	1    0    0    -1  
-$EndComp
-$Comp
-L Connector_Generic:Conn_01x03 J4
-U 1 1 63994E9F
-P 5900 5300
-F 0 "J4" H 5980 5342 50  0000 L CNN
-F 1 "S3" H 5980 5251 50  0000 L CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x03_P2.54mm_Vertical" H 5900 5300 50  0001 C CNN
-F 3 "~" H 5900 5300 50  0001 C CNN
-	1    5900 5300
-	1    0    0    -1  
-$EndComp
-Text GLabel 5500 4600 0    50   Input ~ 0
-IO2
-Text GLabel 4500 4600 0    50   Input ~ 0
-IO0
-$Comp
-L power:GND #PWR020
-U 1 1 6397B3A3
-P 4700 5400
-F 0 "#PWR020" H 4700 5150 50  0001 C CNN
-F 1 "GND" H 4705 5227 50  0000 C CNN
-F 2 "" H 4700 5400 50  0001 C CNN
-F 3 "" H 4700 5400 50  0001 C CNN
-	1    4700 5400
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:+5V #PWR019
-U 1 1 6397B39D
-P 4700 5200
-F 0 "#PWR019" H 4700 5050 50  0001 C CNN
-F 1 "+5V" H 4715 5373 50  0000 C CNN
-F 2 "" H 4700 5200 50  0001 C CNN
-F 3 "" H 4700 5200 50  0001 C CNN
-	1    4700 5200
-	1    0    0    -1  
-$EndComp
-$Comp
-L Connector_Generic:Conn_01x03 J2
-U 1 1 6397B397
-P 4900 5300
-F 0 "J2" H 4980 5342 50  0000 L CNN
-F 1 "S2" H 4980 5251 50  0000 L CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x03_P2.54mm_Vertical" H 4900 5300 50  0001 C CNN
-F 3 "~" H 4900 5300 50  0001 C CNN
-	1    4900 5300
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR025
-U 1 1 63977345
-P 5700 4700
-F 0 "#PWR025" H 5700 4450 50  0001 C CNN
-F 1 "GND" H 5705 4527 50  0000 C CNN
-F 2 "" H 5700 4700 50  0001 C CNN
-F 3 "" H 5700 4700 50  0001 C CNN
-	1    5700 4700
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:+5V #PWR024
-U 1 1 6397733F
-P 5700 4500
-F 0 "#PWR024" H 5700 4350 50  0001 C CNN
-F 1 "+5V" H 5715 4673 50  0000 C CNN
-F 2 "" H 5700 4500 50  0001 C CNN
-F 3 "" H 5700 4500 50  0001 C CNN
-	1    5700 4500
-	1    0    0    -1  
-$EndComp
-$Comp
-L Connector_Generic:Conn_01x03 J3
-U 1 1 63977339
-P 5900 4600
-F 0 "J3" H 5980 4642 50  0000 L CNN
-F 1 "S1" H 5980 4551 50  0000 L CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x03_P2.54mm_Vertical" H 5900 4600 50  0001 C CNN
-F 3 "~" H 5900 4600 50  0001 C CNN
-	1    5900 4600
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR018
-U 1 1 63971431
-P 4700 4700
-F 0 "#PWR018" H 4700 4450 50  0001 C CNN
-F 1 "GND" H 4705 4527 50  0000 C CNN
-F 2 "" H 4700 4700 50  0001 C CNN
-F 3 "" H 4700 4700 50  0001 C CNN
-	1    4700 4700
-	1    0    0    -1  
-$EndComp
-$Comp
-L Connector_Generic:Conn_01x03 J1
-U 1 1 6396BEA9
-P 4900 4600
-F 0 "J1" H 4980 4642 50  0000 L CNN
-F 1 "S0" H 4980 4551 50  0000 L CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x03_P2.54mm_Vertical" H 4900 4600 50  0001 C CNN
-F 3 "~" H 4900 4600 50  0001 C CNN
-	1    4900 4600
-	1    0    0    -1  
-$EndComp
 Connection ~ 4750 3450
 Wire Wire Line
 	5300 3450 4750 3450
@@ -1227,55 +1015,14 @@ F 3 "" H 3400 950 50  0001 C CNN
 $EndComp
 Connection ~ 3400 950 
 Text Notes 5900 2650 0    50   ~ 0
-Communication
+Pinout(3 Servo)
 Text Notes 700  4200 0    50   ~ 0
 USB TTL
 Text Notes 4100 4200 0    50   ~ 0
-Peripherals
+Pinout
 Connection ~ 8700 1100
 Wire Wire Line
 	8600 1100 8700 1100
-$Comp
-L Connector_Generic:Conn_01x04 J9
-U 1 1 63C601E5
-P 6350 3200
-F 0 "J9" H 6430 3192 50  0000 L CNN
-F 1 "I2C" H 6430 3101 50  0000 L CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical" H 6350 3200 50  0001 C CNN
-F 3 "~" H 6350 3200 50  0001 C CNN
-	1    6350 3200
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:+3V3 #PWR040
-U 1 1 63C601EB
-P 6000 3100
-F 0 "#PWR040" H 6000 2950 50  0001 C CNN
-F 1 "+3V3" H 6015 3273 50  0000 C CNN
-F 2 "" H 6000 3100 50  0001 C CNN
-F 3 "" H 6000 3100 50  0001 C CNN
-	1    6000 3100
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR041
-U 1 1 63C601F1
-P 6000 3400
-F 0 "#PWR041" H 6000 3150 50  0001 C CNN
-F 1 "GND" H 6005 3227 50  0000 C CNN
-F 2 "" H 6000 3400 50  0001 C CNN
-F 3 "" H 6000 3400 50  0001 C CNN
-	1    6000 3400
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	6000 3400 6150 3400
-Text GLabel 6150 3200 0    50   Input ~ 0
-SDA
-Text GLabel 6150 3300 0    50   Input ~ 0
-SCL
-Wire Wire Line
-	6000 3100 6150 3100
 $Comp
 L power:GND #PWR01
 U 1 1 63C8E842
@@ -1435,8 +1182,6 @@ F 3 "" H 5050 1200 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Connection ~ 4650 1400
-Text GLabel 5500 5300 0    50   Input ~ 0
-GPIO15
 $Comp
 L Device:R_Small R23
 U 1 1 63867351
@@ -1500,54 +1245,6 @@ Text GLabel 6850 5050 0    50   Input ~ 0
 GPIO13
 Text GLabel 8450 5050 0    50   Input ~ 0
 GPIO14
-$Comp
-L power:+3V3 #PWR032
-U 1 1 63808995
-P 6850 3100
-F 0 "#PWR032" H 6850 2950 50  0001 C CNN
-F 1 "+3V3" H 6865 3273 50  0000 C CNN
-F 2 "" H 6850 3100 50  0001 C CNN
-F 3 "" H 6850 3100 50  0001 C CNN
-	1    6850 3100
-	1    0    0    -1  
-$EndComp
-$Comp
-L Connector_Generic:Conn_01x04 J5
-U 1 1 63998E5D
-P 7050 3200
-F 0 "J5" H 7130 3192 50  0000 L CNN
-F 1 "IMU" H 7130 3101 50  0000 L CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical" H 7050 3200 50  0001 C CNN
-F 3 "~" H 7050 3200 50  0001 C CNN
-	1    7050 3200
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR033
-U 1 1 63C6EBA3
-P 6850 3200
-F 0 "#PWR033" H 6850 2950 50  0001 C CNN
-F 1 "GND" V 6855 3072 50  0000 R CNN
-F 2 "" H 6850 3200 50  0001 C CNN
-F 3 "" H 6850 3200 50  0001 C CNN
-	1    6850 3200
-	0    1    1    0   
-$EndComp
-Text GLabel 6850 3300 0    50   Input ~ 0
-SCL
-Text GLabel 6850 3400 0    50   Input ~ 0
-SDA
-$Comp
-L power:+3V3 #PWR030
-U 1 1 639B5590
-P 7400 3100
-F 0 "#PWR030" H 7400 2950 50  0001 C CNN
-F 1 "+3V3" H 7415 3273 50  0000 C CNN
-F 2 "" H 7400 3100 50  0001 C CNN
-F 3 "" H 7400 3100 50  0001 C CNN
-	1    7400 3100
-	1    0    0    -1  
-$EndComp
 Wire Notes Line
 	4050 4050 6250 4050
 Wire Notes Line
@@ -1839,4 +1536,218 @@ F 3 "https://www.usb.org/sites/default/files/documents/usb_type-c.zip" H 1450 22
 $EndComp
 NoConn ~ 1900 2800
 NoConn ~ 1900 2700
+$Comp
+L Device:R_Small R14
+U 1 1 63A70D76
+P 6700 3500
+F 0 "R14" V 6600 3500 50  0000 C CNN
+F 1 "1k" V 6800 3500 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 6700 3500 50  0001 C CNN
+F 3 "~" H 6700 3500 50  0001 C CNN
+	1    6700 3500
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R13
+U 1 1 63A56AFE
+P 6700 3200
+F 0 "R13" V 6600 3200 50  0000 C CNN
+F 1 "1k" V 6800 3200 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 6700 3200 50  0001 C CNN
+F 3 "~" H 6700 3200 50  0001 C CNN
+	1    6700 3200
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R9
+U 1 1 63A42555
+P 6700 2900
+F 0 "R9" V 6600 2900 50  0000 C CNN
+F 1 "1k" V 6800 2900 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 6700 2900 50  0001 C CNN
+F 3 "~" H 6700 2900 50  0001 C CNN
+	1    6700 2900
+	0    1    1    0   
+$EndComp
+Text GLabel 6600 3200 0    50   Input ~ 0
+IO2
+Text GLabel 6600 2900 0    50   Input ~ 0
+IO0
+Text GLabel 6600 3500 0    50   Input ~ 0
+GPIO15
+$Comp
+L Connector_Generic:Conn_01x09 J2
+U 1 1 63812D4F
+P 7500 3200
+F 0 "J2" H 7580 3242 50  0000 L CNN
+F 1 "Up" H 7580 3151 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x09_P2.54mm_Vertical" H 7500 3200 50  0001 C CNN
+F 3 "~" H 7500 3200 50  0001 C CNN
+	1    7500 3200
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR018
+U 1 1 63857BE8
+P 7000 3600
+F 0 "#PWR018" H 7000 3350 50  0001 C CNN
+F 1 "GND" H 7005 3427 50  0000 C CNN
+F 2 "" H 7000 3600 50  0001 C CNN
+F 3 "" H 7000 3600 50  0001 C CNN
+	1    7000 3600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6800 3500 7300 3500
+Wire Wire Line
+	7300 3200 6800 3200
+Wire Wire Line
+	7300 2900 6800 2900
+Wire Wire Line
+	7000 3600 7300 3600
+Wire Wire Line
+	7300 3300 7000 3300
+Wire Wire Line
+	7000 3300 7000 3600
+Connection ~ 7000 3600
+Wire Wire Line
+	7300 3000 7000 3000
+Wire Wire Line
+	7000 3000 7000 3300
+Connection ~ 7000 3300
+Wire Wire Line
+	7150 2800 7300 2800
+Wire Wire Line
+	7150 2800 7150 3100
+Wire Wire Line
+	7150 3100 7300 3100
+Wire Wire Line
+	7150 3100 7150 3400
+Wire Wire Line
+	7150 3400 7300 3400
+Connection ~ 7150 3100
+Connection ~ 5000 4250
+Wire Wire Line
+	4850 4250 5000 4250
+Text GLabel 5300 5150 2    50   Input ~ 0
+RXD
+Text GLabel 5300 5250 2    50   Input ~ 0
+TXD
+Text GLabel 5750 5550 2    50   Input ~ 0
+GPIO12
+Text GLabel 5300 4450 2    50   Input ~ 0
+SCL
+Text GLabel 5300 4550 2    50   Input ~ 0
+SDA
+$Comp
+L Connector_Generic:Conn_01x15 J1
+U 1 1 63816040
+P 4650 4950
+F 0 "J1" H 4900 5000 50  0000 C CNN
+F 1 "Bottom" H 4950 4900 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x15_P2.54mm_Vertical" H 4650 4950 50  0001 C CNN
+F 3 "~" H 4650 4950 50  0001 C CNN
+	1    4650 4950
+	-1   0    0    -1  
+$EndComp
+$Comp
+L power:+5V #PWR06
+U 1 1 6384D77E
+P 4850 5450
+F 0 "#PWR06" H 4850 5300 50  0001 C CNN
+F 1 "+5V" V 4865 5578 50  0000 L CNN
+F 2 "" H 4850 5450 50  0001 C CNN
+F 3 "" H 4850 5450 50  0001 C CNN
+	1    4850 5450
+	0    1    1    0   
+$EndComp
+Text GLabel 5300 4850 2    50   Input ~ 0
+SCL
+Text GLabel 5300 4950 2    50   Input ~ 0
+SDA
+Wire Wire Line
+	4850 4450 5300 4450
+Wire Wire Line
+	5300 4550 4850 4550
+Wire Wire Line
+	4850 4850 5300 4850
+Wire Wire Line
+	4850 4950 5300 4950
+Wire Wire Line
+	4850 4350 5150 4350
+Wire Wire Line
+	5150 4350 5150 4750
+Wire Wire Line
+	4850 4650 5000 4650
+Wire Wire Line
+	5000 4650 5000 4250
+Wire Wire Line
+	4850 4750 5150 4750
+Connection ~ 5150 4750
+Wire Wire Line
+	5150 4750 5150 5350
+Wire Wire Line
+	4850 5150 5300 5150
+Wire Wire Line
+	4850 5250 5300 5250
+Wire Wire Line
+	4850 5350 5150 5350
+Connection ~ 5150 5350
+Wire Wire Line
+	5150 5350 5150 5650
+Wire Wire Line
+	4850 5050 5000 5050
+Wire Wire Line
+	5000 5050 5000 4650
+Connection ~ 5000 4650
+$Comp
+L power:GND #PWR033
+U 1 1 63C6EBA3
+P 5150 5650
+F 0 "#PWR033" H 5150 5400 50  0001 C CNN
+F 1 "GND" V 5155 5522 50  0000 R CNN
+F 2 "" H 5150 5650 50  0001 C CNN
+F 3 "" H 5150 5650 50  0001 C CNN
+	1    5150 5650
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:R_Small R10
+U 1 1 63A069BE
+P 5650 5550
+F 0 "R10" V 5550 5550 50  0000 C CNN
+F 1 "1k" V 5750 5550 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 5650 5550 50  0001 C CNN
+F 3 "~" H 5650 5550 50  0001 C CNN
+	1    5650 5550
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	4850 5550 5550 5550
+$Comp
+L power:+3V3 #PWR017
+U 1 1 63974487
+P 5000 4250
+F 0 "#PWR017" H 5000 4100 50  0001 C CNN
+F 1 "+3V3" V 5015 4378 50  0000 L CNN
+F 2 "" H 5000 4250 50  0001 C CNN
+F 3 "" H 5000 4250 50  0001 C CNN
+	1    5000 4250
+	0    1    1    0   
+$EndComp
+Connection ~ 5150 5650
+Wire Wire Line
+	4850 5650 5150 5650
+$Comp
+L power:+5V #PWR?
+U 1 1 639AAB33
+P 7150 2800
+F 0 "#PWR?" H 7150 2650 50  0001 C CNN
+F 1 "+5V" H 7165 2973 50  0000 C CNN
+F 2 "" H 7150 2800 50  0001 C CNN
+F 3 "" H 7150 2800 50  0001 C CNN
+	1    7150 2800
+	1    0    0    -1  
+$EndComp
+Connection ~ 7150 2800
 $EndSCHEMATC
