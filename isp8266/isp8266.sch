@@ -13,95 +13,69 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Text GLabel 1900 1750 2    50   Input ~ 0
+Text GLabel 1900 2300 2    50   Input ~ 0
 D+
-Text GLabel 1900 1550 2    50   Input ~ 0
+Text GLabel 1900 2100 2    50   Input ~ 0
 D-
-Wire Wire Line
-	1000 3650 1300 3650
-$Comp
-L power:GND #PWR04
-U 1 1 638110D1
-P 1300 3650
-F 0 "#PWR04" H 1300 3400 50  0001 C CNN
-F 1 "GND" H 1305 3477 50  0000 C CNN
-F 2 "" H 1300 3650 50  0001 C CNN
-F 3 "" H 1300 3650 50  0001 C CNN
-	1    1300 3650
-	1    0    0    -1  
-$EndComp
 $Comp
 L Device:R_Small R1
 U 1 1 63811A2A
-P 2250 1450
-F 0 "R1" H 2309 1496 50  0000 L CNN
-F 1 "5k1" H 2309 1405 50  0000 L CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 2250 1450 50  0001 C CNN
-F 3 "~" H 2250 1450 50  0001 C CNN
-	1    2250 1450
+P 2250 2000
+F 0 "R1" H 2309 2046 50  0000 L CNN
+F 1 "5k1" H 2309 1955 50  0000 L CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 2250 2000 50  0001 C CNN
+F 3 "~" H 2250 2000 50  0001 C CNN
+	1    2250 2000
 	1    0    0    -1  
 $EndComp
 $Comp
 L Device:R_Small R2
 U 1 1 63813179
-P 2550 1450
-F 0 "R2" H 2609 1496 50  0000 L CNN
-F 1 "5k1" H 2609 1405 50  0000 L CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" H 2550 1450 50  0001 C CNN
-F 3 "~" H 2550 1450 50  0001 C CNN
-	1    2550 1450
+P 2550 2000
+F 0 "R2" H 2609 2046 50  0000 L CNN
+F 1 "5k1" H 2609 1955 50  0000 L CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" H 2550 2000 50  0001 C CNN
+F 3 "~" H 2550 2000 50  0001 C CNN
+	1    2550 2000
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	2550 1350 2550 1250
+	2550 1900 2550 1800
 Wire Wire Line
-	2550 1250 1900 1250
+	2550 1800 1900 1800
 Wire Wire Line
-	1900 1350 2250 1350
+	1900 1900 2250 1900
 $Comp
 L power:GND #PWR09
 U 1 1 638144D3
-P 2250 1550
-F 0 "#PWR09" H 2250 1300 50  0001 C CNN
-F 1 "GND" H 2255 1377 50  0000 C CNN
-F 2 "" H 2250 1550 50  0001 C CNN
-F 3 "" H 2250 1550 50  0001 C CNN
-	1    2250 1550
+P 2250 2100
+F 0 "#PWR09" H 2250 1850 50  0001 C CNN
+F 1 "GND" H 2255 1927 50  0000 C CNN
+F 2 "" H 2250 2100 50  0001 C CNN
+F 3 "" H 2250 2100 50  0001 C CNN
+	1    2250 2100
 	1    0    0    -1  
 $EndComp
 $Comp
 L power:GND #PWR010
 U 1 1 63814BDE
-P 2550 1550
-F 0 "#PWR010" H 2550 1300 50  0001 C CNN
-F 1 "GND" H 2555 1377 50  0000 C CNN
-F 2 "" H 2550 1550 50  0001 C CNN
-F 3 "" H 2550 1550 50  0001 C CNN
-	1    2550 1550
+P 2550 2100
+F 0 "#PWR010" H 2550 1850 50  0001 C CNN
+F 1 "GND" H 2555 1927 50  0000 C CNN
+F 2 "" H 2550 2100 50  0001 C CNN
+F 3 "" H 2550 2100 50  0001 C CNN
+	1    2550 2100
 	1    0    0    -1  
 $EndComp
-$Comp
-L power:GND #PWR06
-U 1 1 63815628
-P 1900 3050
-F 0 "#PWR06" H 1900 2800 50  0001 C CNN
-F 1 "GND" H 1905 2877 50  0001 C CNN
-F 2 "" H 1900 3050 50  0001 C CNN
-F 3 "" H 1900 3050 50  0001 C CNN
-	1    1900 3050
-	1    0    0    -1  
-$EndComp
-NoConn ~ 1900 3250
-NoConn ~ 1900 3350
 $Comp
 L power:VBUS #PWR05
 U 1 1 63834DD7
-P 1900 1050
-F 0 "#PWR05" H 1900 900 50  0001 C CNN
-F 1 "VBUS" H 1915 1223 50  0000 C CNN
-F 2 "" H 1900 1050 50  0001 C CNN
-F 3 "" H 1900 1050 50  0001 C CNN
-	1    1900 1050
+P 1900 1600
+F 0 "#PWR05" H 1900 1450 50  0001 C CNN
+F 1 "VBUS" H 1915 1773 50  0000 C CNN
+F 2 "" H 1900 1600 50  0001 C CNN
+F 3 "" H 1900 1600 50  0001 C CNN
+	1    1900 1600
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -1328,43 +1302,6 @@ F 3 "~" H 950 4600 50  0001 C CNN
 	1    950  4600
 	1    0    0    -1  
 $EndComp
-$Comp
-L Connector:USB_C_Receptacle J11
-U 1 1 63C95E22
-P 1300 2050
-F 0 "J11" H 1407 3317 50  0000 C CNN
-F 1 "USB_C_Receptacle" H 1407 3226 50  0000 C CNN
-F 2 "Connector_USB:USB_C_Receptacle_Amphenol_12401610E4-2A" H 1450 2050 50  0001 C CNN
-F 3 "https://www.usb.org/sites/default/files/documents/usb_type-c.zip" H 1450 2050 50  0001 C CNN
-	1    1300 2050
-	1    0    0    -1  
-$EndComp
-Connection ~ 1300 3650
-Wire Wire Line
-	1900 2950 1900 3050
-Connection ~ 1900 3050
-Wire Wire Line
-	1900 2050 1900 2150
-Connection ~ 1900 2150
-Wire Wire Line
-	1900 2150 1900 2350
-Connection ~ 1900 2350
-Wire Wire Line
-	1900 2350 1900 2450
-Connection ~ 1900 2450
-Wire Wire Line
-	1900 2450 1900 2650
-Connection ~ 1900 2650
-Wire Wire Line
-	1900 2650 1900 2750
-Connection ~ 1900 2750
-Wire Wire Line
-	1900 2750 1900 2950
-Connection ~ 1900 2950
-Text GLabel 1900 1650 2    50   Input ~ 0
-D-
-Text GLabel 1900 1850 2    50   Input ~ 0
-D+
 Wire Notes Line
 	3000 3900 5650 3900
 Wire Notes Line
@@ -1871,4 +1808,35 @@ F 3 "https://www.onsemi.com/pub/Collateral/BSS138-D.PDF" H 8650 4950 50  0001 L 
 	0    1    1    0   
 $EndComp
 Connection ~ 8850 5050
+Text GLabel 1900 2400 2    50   Input ~ 0
+D+
+Text GLabel 1900 2200 2    50   Input ~ 0
+D-
+Wire Wire Line
+	1000 3100 1300 3100
+$Comp
+L power:GND #PWR04
+U 1 1 638110D1
+P 1300 3100
+F 0 "#PWR04" H 1300 2850 50  0001 C CNN
+F 1 "GND" H 1305 2927 50  0000 C CNN
+F 2 "" H 1300 3100 50  0001 C CNN
+F 3 "" H 1300 3100 50  0001 C CNN
+	1    1300 3100
+	1    0    0    -1  
+$EndComp
+Connection ~ 1300 3100
+$Comp
+L Connector:USB_C_Receptacle_USB2.0 J11
+U 1 1 63983D7F
+P 1300 2200
+F 0 "J11" H 1450 1450 50  0000 C CNN
+F 1 "USB_C_Receptacle_USB2.0" H 1900 1350 50  0000 C CNN
+F 2 "Connector_USB:USB_C_Receptacle_Palconn_UTC16-G" H 1450 2200 50  0001 C CNN
+F 3 "https://www.usb.org/sites/default/files/documents/usb_type-c.zip" H 1450 2200 50  0001 C CNN
+	1    1300 2200
+	1    0    0    -1  
+$EndComp
+NoConn ~ 1900 2800
+NoConn ~ 1900 2700
 $EndSCHEMATC
