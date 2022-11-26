@@ -1350,7 +1350,7 @@ U 1 1 63963FAC
 P 10000 5250
 F 0 "JP1" V 9954 5336 50  0000 L CNN
 F 1 "IGN_VOL" V 10045 5336 50  0000 L CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x03_P2.54mm_Vertical" H 10000 5250 50  0001 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" H 10000 5250 50  0001 C CNN
 F 3 "~" H 10000 5250 50  0001 C CNN
 	1    10000 5250
 	0    1    1    0   
@@ -1587,18 +1587,17 @@ Wire Wire Line
 Wire Wire Line
 	7150 3400 7300 3400
 Connection ~ 7150 3100
-Connection ~ 5000 4250
 Wire Wire Line
-	4850 4250 5000 4250
+	4850 4550 5000 4550
 Text GLabel 5300 5150 2    50   Input ~ 0
 RXD
 Text GLabel 5300 5250 2    50   Input ~ 0
 TXD
 Text GLabel 5750 5550 2    50   Input ~ 0
 GPIO12
-Text GLabel 5300 4450 2    50   Input ~ 0
+Text GLabel 5300 4350 2    50   Input ~ 0
 SCL
-Text GLabel 5300 4550 2    50   Input ~ 0
+Text GLabel 5300 4250 2    50   Input ~ 0
 SDA
 $Comp
 L Connector_Generic:Conn_01x15 J1
@@ -1627,24 +1626,17 @@ SCL
 Text GLabel 5300 4950 2    50   Input ~ 0
 SDA
 Wire Wire Line
-	4850 4450 5300 4450
+	4850 4350 5300 4350
 Wire Wire Line
-	5300 4550 4850 4550
+	5300 4250 4850 4250
 Wire Wire Line
 	4850 4850 5300 4850
 Wire Wire Line
 	4850 4950 5300 4950
 Wire Wire Line
-	4850 4350 5150 4350
-Wire Wire Line
-	5150 4350 5150 4750
-Wire Wire Line
 	4850 4650 5000 4650
 Wire Wire Line
-	5000 4650 5000 4250
-Wire Wire Line
 	4850 4750 5150 4750
-Connection ~ 5150 4750
 Wire Wire Line
 	5150 4750 5150 5350
 Wire Wire Line
@@ -1660,7 +1652,6 @@ Wire Wire Line
 	4850 5050 5000 5050
 Wire Wire Line
 	5000 5050 5000 4650
-Connection ~ 5000 4650
 $Comp
 L power:GND #PWR033
 U 1 1 63C6EBA3
@@ -1688,12 +1679,12 @@ Wire Wire Line
 $Comp
 L power:+3V3 #PWR017
 U 1 1 63974487
-P 5000 4250
-F 0 "#PWR017" H 5000 4100 50  0001 C CNN
-F 1 "+3V3" V 5015 4378 50  0000 L CNN
-F 2 "" H 5000 4250 50  0001 C CNN
-F 3 "" H 5000 4250 50  0001 C CNN
-	1    5000 4250
+P 5300 4550
+F 0 "#PWR017" H 5300 4400 50  0001 C CNN
+F 1 "+3V3" V 5315 4678 50  0000 L CNN
+F 2 "" H 5300 4550 50  0001 C CNN
+F 3 "" H 5300 4550 50  0001 C CNN
+	1    5300 4550
 	0    1    1    0   
 $EndComp
 Connection ~ 5150 5650
@@ -1744,4 +1735,15 @@ F 3 "http://wiki.ai-thinker.com/_media/esp8266/esp8266_series_modules_user_manua
 	1    9550 1700
 	1    0    0    -1  
 $EndComp
+Wire Wire Line
+	5000 4650 5000 4550
+Connection ~ 5000 4650
+Wire Wire Line
+	4850 4450 5150 4450
+Wire Wire Line
+	5150 4450 5150 4750
+Connection ~ 5150 4750
+Wire Wire Line
+	5300 4550 5000 4550
+Connection ~ 5000 4550
 $EndSCHEMATC
