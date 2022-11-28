@@ -7,7 +7,7 @@ SYSTEM_STATE System::state = SYSTEM_UP;
 
 System::System()
     : logger(),
-      imu()
+      sensor()
 #ifdef USE_WIFI_COMMUNICATION
       ,
       comms()  // Initialize wifi communication object
@@ -23,10 +23,10 @@ System::System()
     digitalWrite(PIN_SPI_CS_PARTNER, HIGH);
 #endif
 
-// Signal
+// Buzzer signal
 #ifdef USE_PERIPHERAL_BUZZER
     pinMode(PIN_BUZZER, OUTPUT);
-    digitalWrite(PIN_BUZZER, LOW);
+    digitalWrite(PIN_BUZZER, BUZ_ON_LEVEL);
 #endif
 
 // Trigger
@@ -37,8 +37,8 @@ System::System()
     servo.attach(PIN_MOTOR, SERVO_PULSE_MIN, SERVO_PULSE_MAX);
 #endif
 #ifdef LAUNCH_TRIGGER
-    pinMode(PIN_TRIGGER, OUTPUT);
-    digitalWrite(PIN_TRIGGER, LOW);
+    pinMode(PIN_TRIGGER_1, OUTPUT);
+    digitalWrite(PIN_TRIGGER_1, LOW);
 #endif
 
 #ifdef USE_SERVO_CONTROL
@@ -56,13 +56,23 @@ SYSTEM_STATE System::init(bool soft_init)
               .ftype = F_SERVO,
               .buzzState = BUZ_LEVEL1};
 
+#ifdef GROUND_STATION
+    rocket.btype = G_STATION;
+#elif defined(GROUND_IGNITOR)
+    rocket.btype = G_IGNITOR;
+#elif defined(ONBOARD_AVIONICS)
+    rocket.btype = O_AVIONICS;
+#endif
+
     rocket.buzzState = buzz(BUZ_LEVEL1);
 
+#ifdef PARACHUTE_SERVO
     setServo(&servo, SERVO_CLOSED_ANGLE);
+#endif
 
     // Setup logger
-    while (!logger.init()) {
-        // buzzer(BUZ_LEVEL0);
+    if (!logger.init()) {
+        buzz(BUZ_NONE);
     }
 #ifdef USE_WIFI_COMMUNICATION
     if (soft_init)
@@ -72,16 +82,19 @@ SYSTEM_STATE System::init(bool soft_init)
         OTA_init();
     // logger.log_code(INFO_LOGGER_INIT, LEVEL_INFO);
 
-    // Setup IMU
-    if (imu.init() != ERROR_OK) {
-        // logger.log_code(ERROR_IMU_INIT_FAILED, LEVEL_ERROR);
+    // Setup sensors
+    if (sensor.init() != ERROR_OK) {
+        // logger.log_code(ERROR_SENSOR_INIT_FAILED, LEVEL_ERROR);
         // buzzer(BUZ_LEVEL0);
-        comms.wifi_broadcast(String("ERROR_IMU_INIT_FAILED") + LEVEL_ERROR);
-        Serial.println("imu_fail");
+        String error_msg = String("[") + rocket.btype + "] ERROR_SENSOR_INIT_FAILED" + LEVEL_ERROR;
+        comms.wifi_broadcast(error_msg);
+        Serial.println(error_msg);
+#ifdef USE_PERIPHERAL_BUZZER
         digitalWrite(PIN_BUZZER, 1);
+#endif
     } else {
-        Serial.println("imu initialized success");
-        comms.wifi_broadcast("imu initialized success\n");
+        Serial.println("Sensor initialized success");
+        comms.wifi_broadcast(String("[") + rocket.btype + "] Sensor initialized success\n");
     }
     // // logger.log_info(INFO_IMU_INIT);
     // // logger.log_code(INFO_IMU_INIT, LEVEL_INFO);
@@ -171,7 +184,8 @@ void System::loop()
     static bool keep = false;
     // Read and react to the command from comms or debugger
     if (comms.message != "") {
-        command(comms.message, CMD_WIFI);
+        // Substring 4 char to cut out the board prefix of message
+        command(comms.message.substring(4), CMD_WIFI);
     }
 
     static String serial_cmd = "";
@@ -182,9 +196,9 @@ void System::loop()
             Serial.print((char) c);
             serial_cmd += (char) c;
         } else {
-#ifdef ESP_NOW_AGENT
+#ifdef GROUND_STATION
             serial_cmd += "\n";
-            comms.wifi_broadcast(serial_cmd);
+            comms.wifi_broadcast(String("[") + rocket.btype + "] " + serial_cmd);
 #else
             keep = command(serial_cmd, CMD_SERIAL);
 #endif
@@ -196,25 +210,28 @@ void System::loop()
         command(core_cmd, CMD_BOTH);
         core_cmd = "";
     }
-#ifdef ESP_NOW
+#ifdef USE_ESPNOW_COMMUNICATION
     char *esp_now_msg = fetchESPNOWMessage();
     if (esp_now_msg) {
-#ifdef ESP_NOW_AGENT
-        Serial.print(">>>");
+#ifdef GROUND_STATION
+        Serial.println(">>>");
         Serial.println(esp_now_msg);
+        Serial.println("<<<");
 #else
         Serial.printf("Fetch: %s\n", esp_now_msg);
         esp_now_msg[strlen(esp_now_msg) - 1] = 0;
-        command(esp_now_msg, CMD_BOTH);
+        command(esp_now_msg+4, CMD_BOTH);
 #endif
         clearESPNOWMessage();
     }
 #endif
     // servo.write(180);
 
-    imu.update();
+    sensor.update();
 
+#ifdef ONBOARD_AVIONICS
     flight();
+#endif
 
     loading_test(&comms.message);
 
@@ -308,8 +325,8 @@ BUZZER_LEVEL System::buzz(BUZZER_LEVEL beep, int times /* = 0 */)
         break;
     }
 
-    return beep;
 #endif
+    return beep;
 }
 
 void System::trig(int pin, bool trig)
@@ -409,6 +426,7 @@ bool System::command(String cmd, CMD_TYPE type)
     // Preflight command
     else if (cmd == "preLaunch" && rocket.state == ROCKET_READY) {
         rocket.state = ROCKET_PREFLIGHT;
+#ifdef USE_PERIPHERAL_BUZZER
         buzzer.attach(0.5, [=]() {
             static int counter = 0;
             counter++;
@@ -420,6 +438,7 @@ bool System::command(String cmd, CMD_TYPE type)
                 buzzer.once(3, [=]() { rocket.buzzState = buzz(BUZ_NONE); });
             }
         });
+#endif
         msg = "Start count down sequence.";
     }
 
@@ -427,22 +446,22 @@ bool System::command(String cmd, CMD_TYPE type)
     else if (cmd == "launch" && rocket.state == ROCKET_PREFLIGHT) {
         rocket.state = ROCKET_OFFGROUND;
         logger.newFile(LEVEL_FLIGHT);
-        comms.wifi_broadcast("launch");
+        comms.wifi_broadcast(String("[") + rocket.btype + "] launch");
         msg = logger.file_ext + " launch";
 
-        fly_plan.once_ms(release_t, [=]() {
-            core_cmd = "open";
-            fly_plan.detach();
-            fly_plan.once_ms(stop_t, [=]() {
-                rocket.buzzState = buzz(BUZ_LEVEL3);
-                core_cmd = "stop";
-            });
-        });
+        // fly_plan.once_ms(release_t, [=]() {
+        //     core_cmd = "open";
+        //     fly_plan.detach();
+        //     fly_plan.once_ms(stop_t, [=]() {
+        //         rocket.buzzState = buzz(BUZ_LEVEL3);
+        //         core_cmd = "stop";
+        //     });
+        // });
         core_cmd = "stream";
         log.attach_ms(10, [=]() { wait_log = true; });
 
 #ifdef LAUNCH_TRIGGER
-        trig(PIN_TRIGGER, true);
+        trig(PIN_TRIGGER_1, true);
 #endif
     }
 
@@ -525,7 +544,7 @@ bool System::command(String cmd, CMD_TYPE type)
         msg += "fairingOpened: " + String(rocket.fairingOpened ? "open" : "closed") + "\n";
         msg += "fairingOpened type: " +
                String((rocket.ftype == F_TRIGGER) ? "trigger" : "servo") + "\n";
-        msg += "comms state: " + String(rocket.cState);
+        msg += "comms state: " + String(rocket.cState) + "\n";
         msg += "release at " + String(release_t) + "ms\n";
         msg += "stop at " + String(stop_t) + "ms\n";
     }
@@ -562,9 +581,9 @@ bool System::command(String cmd, CMD_TYPE type)
         if (type == CMD_SERIAL || type == CMD_BOTH)
             Serial.print(msg);
         if (type == CMD_WIFI)
-            comms.wifi_broadcast(msg, !keep);
+            comms.wifi_broadcast(String("[") + rocket.btype + "] " + msg, !keep);
         if (type == CMD_BOTH)
-            comms.wifi_broadcast(msg, false);
+            comms.wifi_broadcast(String("[") + rocket.btype + "] " + msg, false);
     }
 
     return keep;
@@ -578,9 +597,9 @@ void System::flight()
     String data_str;
     char data_head;
 #ifdef USE_PERIPHERAL_BMP280
-    height = imu.getBmpAltitude();
-    height_est = imu.altitude_estimate;
-    speed = imu.velocity_estimate;
+    height = sensor.getBmpAltitude();
+    height_est = sensor.getPressure(0);
+    speed = sensor.velocity_estimate;
 #endif
     static unsigned long T_start = -1;
     unsigned long T_plus;
@@ -588,10 +607,11 @@ void System::flight()
     {
         if(!rocket.liftoff)
         {
-            float ACC = (fabs(imu.acc.x) + fabs(imu.acc.y) + fabs(imu.acc.z)) / 3;
+            float ACC = sqrt(pow(sensor.acc.x,2) + pow(sensor.acc.y,2) + pow(sensor.acc.z,2));
             Serial.println(ACC);
             if(ACC > IMU_LIFT_OFF_DETECTION_G) {
                 Serial.println("Lift off");
+                comms.wifi_broadcast("Lift off");
                 rocket.liftoff = true;
                 fly_plan.once_ms(release_t, [=]()
                                  {
@@ -610,7 +630,7 @@ void System::flight()
         T_plus = T_now - T_start;
         data_head = 'f';
 
-        if (imu.pose == ROCKET_FALLING && !rocket.fairingOpened &&
+        if (sensor.pose == ROCKET_FALLING && !rocket.fairingOpened &&
             T_plus > LIFT_OFF_PROTECT_TIME && rocket.liftoff)
         {
             // fairingOpened(openAngle);
@@ -633,17 +653,17 @@ void System::flight()
         comms.dB = 0;
         data_str = String(data_head) + ',' + T_plus + ',' +
                    height + ',' + height_est + ',' + speed + ',' +
-                   imu.acc.x + ',' + imu.acc.y + ',' + imu.acc.z + ',' +
-                   imu.gyro.x + ',' + imu.gyro.y + ',' + imu.gyro.z + ',' +
-                   imu.mag.x + ',' + imu.mag.y + ',' + imu.mag.z + /*',' +
-                   imu.gps.x + imu.gps.y + ',' + imu.gps.z + ',' +
+                   sensor.acc.x + ',' + sensor.acc.y + ',' + sensor.acc.z + ',' +
+                   sensor.gyro.x + ',' + sensor.gyro.y + ',' + sensor.gyro.z + ',' +
+                   sensor.mag.x + ',' + sensor.mag.y + ',' + sensor.mag.z + /*',' +
+                   sensor.gps.x + sensor.gps.y + ',' + sensor.gps.z + ',' +
                    comms.dB +*/
                    '\n';
     }
     if (wait_log)
     {
         logger.log(data_str, LEVEL_FLIGHT);
-        logger.log_data(data, sizeof(data), LEVEL_FLIGHT);
+        // logger.log_data(data, sizeof(data), LEVEL_FLIGHT);
         wait_log = false;
     }
     if (wait_stream)

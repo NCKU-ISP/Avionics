@@ -13,26 +13,30 @@
 /*--------------- System function enable ---------------*/
 #define USE_SERIAL_DEBUGGER
 #define USE_SERIAL_COMMS
-// #define ESP_NOW_AGENT
-#ifdef ESP_NOW_AGENT
+// #define GROUND_STATION
+// #define GROUND_IGNITOR
+#define ONBOARD_AVIONICS
+#ifdef GROUND_STATION
 #ifndef USE_SERIAL_DEBUGGER
 #define USE_SERIAL_DEBUGGER
 #endif
 #ifndef USE_SERIAL_COMMS
 #define USE_SERIAL_COMMS
 #endif
-#endif
+#elif defined(ONBOARD_AVIONICS)
 // #define USE_GPS_NEO6M
 #define USE_PERIPHERAL_BMP280
 // #define USE_PERIPHERAL_BMP280_LIB
-//#define USE_PERIPHERAL_MPU6050
+// #define USE_PERIPHERAL_MPU6050
 #define USE_GY91_MPU9250
 #define USE_PERIPHERAL_BUZZER
+#define PARACHUTE_TRIGGER
+// #define PARACHUTE_SERVO
+#elif defined(GROUND_IGNITOR)
+#define LAUNCH_TRIGGER
+#endif
 
-// #define LAUNCH_TRIGGER
-#define PARACHUTE_SERVO
 // #define USE_SERVO_CONTROL
-// #define PARACHUTE_TRIGGER
 // #define ENGINE_LOADING_TEST
 
 #if defined(V1_ATMEGA328P) || defined(V2_ESP32)
@@ -41,8 +45,8 @@
 #define USE_DUAL_SYSTEM_WATCHDOG
 #elif defined(V2_ESP8266) || defined(V3_PIONEER)
 #define USE_WIFI_COMMUNICATION
+#define USE_ESPNOW_COMMUNICATION
 #define USE_FILE_SYSTEM
-#define ESP_NOW
 #endif
 
 /*--------------------- PIN_SETTING --------------------*/
@@ -84,16 +88,16 @@
 #define PIN_SPI_CS_PARTNER 10
 #endif
 
-// Signal
+// PIN assignment
 #ifdef V1_ATMEGA328P
-#define PIN_TRIGGER 6
+#define PIN_TRIGGER_1 6
 #define PIN_MOTOR 5
 #ifdef USE_PERIPHERAL_BUZZER
 #define PIN_BUZZER 2
 #endif
 #elif defined(V2_ESP8266)
 #ifdef LAUNCH_TRIGGER
-#define PIN_TRIGGER 12
+#define PIN_TRIGGER_1 12
 #endif
 #ifdef PARACHUTE_TRIGGER
 #define PIN_TRIGGER_2 14
@@ -102,6 +106,7 @@
 #endif
 
 #ifdef USE_PERIPHERAL_BUZZER
+#define BUZ_ON_LEVEL 0  // Buzzer buzz on high or low
 #define PIN_BUZZER 3
 #endif
 
@@ -115,7 +120,7 @@
 #endif
 
 #elif defined(V2_ESP32)
-#define PIN_TRIGGER 6
+#define PIN_TRIGGER_1 6
 #define PIN_MOTOR 5
 #elif defined(V3_PIONEER)
 #define S0 0

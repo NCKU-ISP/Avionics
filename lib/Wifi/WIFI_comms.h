@@ -21,7 +21,7 @@
 #include <ESP8266mDNS.h>
 #include <Hash.h>
 #include <WebSocketsServer.h>
-#ifdef ESP_NOW
+#ifdef USE_ESPNOW_COMMUNICATION
 #include <espnow.h>
 char *fetchESPNOWMessage();
 void clearESPNOWMessage();
