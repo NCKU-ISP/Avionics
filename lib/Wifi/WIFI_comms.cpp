@@ -9,7 +9,7 @@ wifiServer::wifiServer() : server(80), webSocket(81), message(""), dB(0) {}
 bool wifiServer::init(const char *ssid /*=WIFI_SSID*/,
                       const char *passward /*=WIFI_PASSWARD*/)
 {
-#ifndef ESP_NOW
+#ifndef USE_ESPNOW_COMMUNICATION
 #ifdef AP_AS_SERVER      // Access point as server (Sky recommanded)
     WiFi.mode(WIFI_AP);  // Set access point ssid and passward
     if (!WiFi.softAP(ssid, passward)) {
@@ -54,7 +54,7 @@ bool wifiServer::init(const char *ssid /*=WIFI_SSID*/,
     webSocket.begin();
     server.begin();
 
-#ifdef ESP_NOW
+#ifdef USE_ESPNOW_COMMUNICATION
     // Init ESP-NOW
     if (esp_now_init() != 0) {
         Serial.println("Error initializing ESP-NOW");
@@ -215,7 +215,7 @@ bool wifiServer::wifi_broadcast(const char *payload, bool cleanMsg)
 #ifdef USE_WIFI_COMMUNICATION
     success |= webSocket.broadcastTXT(payload);
 #endif
-#ifdef ESP_NOW
+#ifdef USE_ESPNOW_COMMUNICATION
     const size_t max_size = 200;
     size_t partition = strlen(payload) / max_size + 1;
     for (size_t i = 0; i < partition; i++) {
@@ -236,7 +236,7 @@ void wifiServer::loop()
     MDNS.update();          // For muiltipule clients to connect
 }
 
-#ifdef ESP_NOW
+#ifdef USE_ESPNOW_COMMUNICATION
 static char message[2048] = {0};
 void onDataSend(uint8_t *mac_addr, uint8_t status)
 {

@@ -37,6 +37,7 @@ enum ROCKET_STATE {
 };
 enum FAIRING_TYPE { F_SERVO, F_TRIGGER };
 enum COMMS_STATE { WIFI_DISCONNECTED, WIFI_CONNECTED };
+enum BOARD_TYPE { G_STATION, G_IGNITOR, O_AVIONICS};
 typedef struct rocket_status {
     ROCKET_STATE state;
     bool fairingOpened;
@@ -44,6 +45,7 @@ typedef struct rocket_status {
     COMMS_STATE cState;
     BUZZER_LEVEL buzzState;
     bool liftoff;
+    BOARD_TYPE btype;
 } ROC_STATE;
 
 #define TIMER_PRESCALER_1 0x01
@@ -99,7 +101,7 @@ public:
                         .ftype = F_SERVO,
                         .buzzState = BUZ_LEVEL1};
     Logger logger;
-    SENSOR imu;
+    SENSOR sensor;
 #ifdef USE_WIFI_COMMUNICATION
     wifiServer comms;
 #endif

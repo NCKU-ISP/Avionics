@@ -57,6 +57,7 @@ private:
 
 #ifdef USE_PERIPHERAL_BMP280
     Adafruit_BMP280 bmp;  // I2C
+    SimpleKalmanFilter *altitudeKalmanFilter;
 #endif
     float altitude_bmp;
     float velocity_bmp;
@@ -65,8 +66,6 @@ private:
     float pressure_HPa;
 
     float rate_bmp;
-
-    SimpleKalmanFilter *altitudeKalmanFilter;
 
 public:
     fvec_t acc, gyro, mag, gps;
