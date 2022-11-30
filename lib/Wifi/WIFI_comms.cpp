@@ -2,7 +2,9 @@
 #ifdef USE_WIFI_COMMUNICATION
 
 // ESP-NOW broadcast address
-static uint8_t sendTo[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+static uint8_t groundMac[] = {0xBC, 0xFF, 0x4D, 0x18, 0xF5, 0xF6};
+static uint8_t ignitorMac[] = {0xE8, 0xDB, 0x84, 0x94, 0x17, 0xB2};
+static uint8_t vehicleMAC[] = {0xE8, 0xDB, 0x84, 0x94, 0x6B, 0x78};
 
 wifiServer::wifiServer() : server(80), webSocket(81), message(""), dB(0) {}
 
@@ -67,10 +69,9 @@ bool wifiServer::init(const char *ssid /*=WIFI_SSID*/,
     esp_now_register_recv_cb(onDataRecv);
 
     // Register peer
-    if (esp_now_add_peer(sendTo, ESP_NOW_ROLE_COMBO, 1, NULL, 0)) {
-        Serial.printf("Error ESP-NOW add peer %d\n");
-        return false;
-    }
+    esp_now_add_peer(ignitorMac, ESP_NOW_ROLE_COMBO, 1, NULL, 0);
+    esp_now_add_peer(vehicleMAC, ESP_NOW_ROLE_COMBO, 1, NULL, 0);
+    esp_now_add_peer(groundMac, ESP_NOW_ROLE_COMBO, 1, NULL, 0);
 #endif
 
     return true;  // If all things operate successfully
@@ -219,9 +220,18 @@ bool wifiServer::wifi_broadcast(const char *payload, bool cleanMsg)
     const size_t max_size = 200;
     size_t partition = strlen(payload) / max_size + 1;
     for (size_t i = 0; i < partition; i++) {
+#ifdef GROUND_STATION
         success |= esp_now_send(
-            sendTo, (u8 *) payload + (max_size * i),
+            vehicleMAC, (u8 *) payload + (max_size * i),
             i == partition - 1 ? (strlen(payload) % max_size) : max_size);
+        success |= esp_now_send(
+            ignitorMac, (u8 *) payload + (max_size * i),
+            i == partition - 1 ? (strlen(payload) % max_size) : max_size);
+#else
+        success |= esp_now_send(
+            groundMac, (u8 *) payload + (max_size * i),
+            i == partition - 1 ? (strlen(payload) % max_size) : max_size);
+#endif
     }
 #endif
     if (success && cleanMsg)
