@@ -55,6 +55,13 @@ void System::load_config()
     config.read();
     release_t = config.config.rtime;
     stop_t = config.config.stime;
+    kp = config.config.kp;
+    ki = config.config.ki;
+    kd = config.config.kd;
+    gy_target = config.config.gy_target;
+    bldc_init = config.config.bldc_init;
+    reactionWheel->SetTunings(kp, ki, kd);
+    reactionWheel->SetOutputLimits(0, config.config.speed_limit);
 }
 
 SYSTEM_STATE System::init(bool soft_init)
@@ -152,8 +159,7 @@ SYSTEM_STATE System::init(bool soft_init)
     bldc_output = 0;
     gy_target = 0;
     reactionWheel = new PID(&gy_input, &bldc_output, &gy_target, ki, kp, kd,
-                            P_ON_M, REVERSE);
-    reactionWheel->SetOutputLimits(0, 60);
+                            P_ON_M, DIRECT);
     PID_ON = false;
     reactionWheel->SetMode(PID_ON);
 #endif
@@ -613,21 +619,32 @@ bool System::command(String cmd, CMD_TYPE type)
                 config.config.rtime = cmd.substring(16).toInt();
             else if (cmd.substring(11, 16) == "stime")
                 config.config.stime = cmd.substring(16).toInt();
+            else if (cmd.substring(11, 13) == "kp")
+                config.config.kp = cmd.substring(13).toDouble();
+            else if (cmd.substring(11, 13) == "ki")
+                config.config.ki = cmd.substring(13).toDouble();
+            else if (cmd.substring(11, 13) == "kd")
+                config.config.kd = cmd.substring(13).toDouble();
+            else if (cmd.substring(11, 20) == "bldc_init")
+                config.config.bldc_init = cmd.substring(20).toDouble();
+            else if (cmd.substring(11, 20) == "gy_target")
+                config.config.gy_target = cmd.substring(20).toDouble();
+            else if (cmd.substring(11, 22) == "speed_limit")
+                config.config.speed_limit = cmd.substring(22).toInt();
             config.write();
             msg += "Writing...\n";
         }
         load_config();
-        msg += String("Config:\n") + "rtime:" + (int) config.config.rtime +
-               "\n" + "stime:" + (int) config.config.stime;
+        msg += String("Config:\n") + "rtime:" + (int) release_t + "\n" +
+               "stime:" + (int) stop_t + "\n" +
+               "PID:" + String(PID_ON ? "ON" : "OFF") + ",kp:" + kp +
+               ",ki:" + ki + ",kd:" + kd + "\ninput:" + gy_input +
+               ",output:" + bldc_output + ",target:" + gy_target +
+               "\nbldc_init:" + bldc_init +
+               "\nspeed_limit:" + config.config.speed_limit;
+        ;
     }
 #ifdef DE_SPIN_CONTROL
-    // Show the pid status and gain
-    else if (cmd == "pid") {
-        msg = "PID:" + String(PID_ON ? "ON" : "OFF") + ",kp:" + kp +
-              ",ki:" + ki + ",kd:" + kd + "\ninput:" + gy_input +
-              ",output:" + bldc_output + ",target:" + gy_target +
-              "\nbldc_init:" + bldc_init;
-    }
     // Set kp gain
     else if (cmd.substring(0, 2) == "kp") {
         kp = cmd.substring(2).toDouble();

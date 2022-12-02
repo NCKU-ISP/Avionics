@@ -6,6 +6,12 @@
 typedef struct config {
     uint64_t rtime;
     uint64_t stime;
+    double gy_target;
+    double bldc_init;
+    double kp;
+    double ki;
+    double kd;
+    uint16_t speed_limit;
 } config_t;
 
 class Config
