@@ -28,15 +28,41 @@ bool SENSOR::init_imu()
 
     // The sample rate of the accel/gyro can be set using
     // setSampleRate. Acceptable values range from 4Hz to 1kHz
-    imu.setSampleRate(100);  // Set sample rate to 10Hz
+    imu.setSampleRate(1000);  // Set sample rate to 1kHz
+
+    imu.setCompassSampleRate(100);
 
     // imu.dmpBegin(DMP_FEATURE_GYRO_CAL |   // Enable gyro cal
     //           DMP_FEATURE_SEND_CAL_GYRO,// Send cal'd gyro values
     //           100);
-
+    calibrate_imu();
     Serial.println("IMU initialize successfully");
 #endif
     return 0;
+}
+
+void SENSOR::calibrate_imu()
+{
+    acc_bias.x = 0.481620016135836;
+    acc_bias.y = 0.342010466830107;
+    acc_bias.z = -0.140797227553077;
+    acc_scale.x = 0.999321184282955;
+    acc_scale.y = 1.00502079325252;
+    acc_scale.z = 0.995680172528931;
+
+    gyro_bias.x = -7.63314044250000;
+    gyro_bias.y = -1.11030489300000;
+    gyro_bias.z = -3.81207332550001;
+    gyro_scale.x = 1;
+    gyro_scale.y = 1;
+    gyro_scale.z = 1;
+
+    mag_bias.x = 54.4470230785505;
+    mag_bias.y = 55.7092688360328;
+    mag_bias.z = -23.9733015260566;
+    mag_scale.x = 1;
+    mag_scale.y = 1;
+    mag_scale.z = 1;
 }
 
 bool SENSOR::init_bmp()
@@ -135,15 +161,15 @@ void SENSOR::update_imu()
     // Update the imu data
     imu.update(UPDATE_ACCEL | UPDATE_GYRO | UPDATE_COMPASS);
 
-    acc.x = imu.calcAccel(imu.ax);
-    acc.y = imu.calcAccel(imu.ay);
-    acc.z = imu.calcAccel(imu.az);
-    gyro.x = imu.calcGyro(imu.gx);
-    gyro.y = imu.calcGyro(imu.gy);
-    gyro.z = imu.calcGyro(imu.gz);
-    mag.x = imu.calcMag(imu.mx);
-    mag.y = imu.calcMag(imu.my);
-    mag.z = imu.calcMag(imu.mz);
+    acc.x = acc_scale.x * imu.calcAccel(imu.ax) - acc_bias.x;
+    acc.y = acc_scale.y * imu.calcAccel(imu.ay) - acc_bias.y;
+    acc.z = acc_scale.z * imu.calcAccel(imu.az) - acc_bias.z;
+    gyro.x = gyro_scale.x * imu.calcGyro(imu.gx) - gyro_bias.x;
+    gyro.y = gyro_scale.y * imu.calcGyro(imu.gy) - gyro_bias.y;
+    gyro.z = gyro_scale.z * imu.calcGyro(imu.gz) - gyro_bias.z;
+    mag.x = mag_scale.x * imu.calcMag(imu.mx) - mag_bias.x;
+    mag.y = mag_scale.y * imu.calcMag(imu.my) - mag_bias.y;
+    mag.z = mag_scale.z * imu.calcMag(imu.mz) - mag_bias.z;
 #endif
 }
 

@@ -2,9 +2,9 @@
 #ifdef USE_WIFI_COMMUNICATION
 
 // ESP-NOW broadcast address
-static uint8_t groundMac[] = {0xBC, 0xFF, 0x4D, 0x18, 0xF5, 0xF6};
-static uint8_t ignitorMac[] = {0xE8, 0xDB, 0x84, 0x94, 0x17, 0xB2};
-static uint8_t vehicleMAC[] = {0xE8, 0xDB, 0x84, 0x94, 0x6B, 0x78};
+static uint8_t ignitorMac[] = {0xBC, 0xFF, 0x4D, 0x18, 0xF5, 0xF6};
+static uint8_t groundMac[] = {0xE8, 0xDB, 0x84, 0x94, 0x17, 0xB2};
+static uint8_t vehicleMAC[] = {0x98, 0xCD, 0xAC, 0x23, 0xD2, 0x33};
 
 wifiServer::wifiServer() : server(80), webSocket(81), message(""), dB(0) {}
 
@@ -32,7 +32,7 @@ bool wifiServer::init(const char *ssid /*=WIFI_SSID*/,
 #else
     WiFi.mode(WIFI_STA);
 #endif
-    Serial.println(String("MAC Address: ") + WiFi.macAddress());
+    Serial.println(String("\nMAC Address: ") + WiFi.macAddress());
 
     server.onNotFound(
         [=]() {  //[=] lambda expression calling all variables by value

@@ -25,6 +25,10 @@
 #include <HX711.h>
 #endif
 
+#ifdef DE_SPIN_CONTROL
+#include <PID_v1.h>
+#endif
+
 enum SYSTEM_STATE { SYSTEM_UP, SYSTEM_READY, SYSTEM_ERROR };
 enum SPI_MASTER { SPI_NONE, SPI_SD, SPI_COMMUNICATION };
 enum BUZZER_LEVEL { BUZ_NONE, BUZ_LEVEL1, BUZ_LEVEL2, BUZ_LEVEL3, BUZ_LEVEL4 };
@@ -72,6 +76,7 @@ private:
     Ticker stream;
     Ticker count_down;
     Ticker fire;
+    Ticker pid_print;
 
     String data = "";
 
@@ -116,6 +121,13 @@ public:
     SYSTEM_STATE init(bool soft_init = true);
 
     /* For WiFi communication */
+#ifdef DE_SPIN_CONTROL
+    PID *reactionWheel;
+    double gy_input, bldc_output, gy_target, bldc_init;
+    double kp = 1, ki = 1, kd = 0;
+    Servo bldc;
+    bool PID_ON;
+#endif
 
     void loop();
 
@@ -135,6 +147,8 @@ public:
     bool command(String cmd, CMD_TYPE type = CMD_SERIAL);
     void flight();
     void loading_test(String *command);
+
+    void deSpinControl(bool ON);
 };
 
 #endif

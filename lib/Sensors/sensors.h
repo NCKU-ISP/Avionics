@@ -69,6 +69,8 @@ private:
 
 public:
     fvec_t acc, gyro, mag, gps;
+    fvec_t acc_scale, gyro_scale, mag_scale;
+    fvec_t acc_bias, gyro_bias, mag_bias;
     float altitude_estimate;
     float velocity_estimate;
 
@@ -91,7 +93,7 @@ public:
     bool init_bmp();
     bool init_gps();
 
-    // void calibrate_imu();
+    void calibrate_imu();
     void calibrate_bmp();
     // void calibrate_gps();
 

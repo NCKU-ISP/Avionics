@@ -134,6 +134,19 @@ SYSTEM_STATE System::init(bool soft_init)
     Serial.println("Ready!");
 #endif
 
+#ifdef DE_SPIN_CONTROL
+    bldc.attach(13, 1000, 2000);
+    bldc.write(0);
+    bldc_init = 20;
+    gy_input = 0;
+    bldc_output = 0;
+    gy_target = 0;
+    reactionWheel = new PID(&gy_input, &bldc_output, &gy_target, ki, kp, kd, P_ON_M, REVERSE);
+    reactionWheel->SetOutputLimits(0, 60);
+    PID_ON = false;
+    reactionWheel->SetMode(PID_ON);
+#endif
+
     return SYSTEM_READY;
 }
 
@@ -250,6 +263,10 @@ void System::loop()
             imu.gpsCode = "";
         }
     }
+#endif
+
+#ifdef DE_SPIN_CONTROL
+    deSpinControl(PID_ON);
 #endif
 }
 
@@ -575,6 +592,59 @@ bool System::command(String cmd, CMD_TYPE type)
         msg = "soft init";
     }
 
+#ifdef DE_SPIN_CONTROL
+    // Show the pid status and gain
+    else if (cmd == "pid") {
+        msg = "PID:" + String(PID_ON ? "ON" : "OFF") +
+              ",kp:" + kp + ",ki:" + ki + ",kd:" + kd + 
+              "\ninput:" + gy_input + ",output:" + bldc_output + ",target:" + gy_target +
+              "\nbldc_init:" + bldc_init;
+    }
+    // Set kp gain
+    else if (cmd.substring(0, 2) == "kp") {
+        kp = cmd.substring(2).toDouble();
+        reactionWheel->SetTunings(kp, ki, kd);
+    }
+    // Set ki gain
+    else if (cmd.substring(0, 2) == "ki") {
+        ki = cmd.substring(2).toDouble();
+        reactionWheel->SetTunings(kp, ki, kd);
+    }
+    // Set kd gain
+    else if (cmd.substring(0, 2) == "kd") {
+        kd = cmd.substring(2).toDouble();
+        reactionWheel->SetTunings(kp, ki, kd);
+    }
+    else if (cmd.substring(0, 9) == "bldc_init") {
+        bldc_init = cmd.substring(9).toDouble();
+    }
+    // Turn on/off pid control
+    else if (cmd == "pid off") {
+        PID_ON = false;
+        // pid_print.detach();
+    } else if (cmd == "pid on") {
+        // pid_print.attach_ms(50, [=]() {
+        //     String payload = "in:" + String(gy_input) + ",out:" + bldc_output;
+        //     comms.wifi_broadcast(payload);
+        // });
+        PID_ON = true;
+    }
+
+    else if (cmd.substring(0,4) == "bldc") {
+        if (PID_ON) {
+            msg = "Unable to change motor speed while pid is on.";
+        } else {
+            bldc.write(cmd.substring(4).toInt());
+        }
+    }
+
+    else if (cmd == "0") {
+        PID_ON = false;
+        bldc.write(0);
+    }
+
+#endif
+
     // Print out msg through serial or wifi
     if (msg != "") {
         msg += "\n";
@@ -710,3 +780,21 @@ void System::loading_test(String *command)
     }
 #endif
 }
+
+#ifdef DE_SPIN_CONTROL
+void System::deSpinControl(bool ON)
+{
+    if(ON) {
+        reactionWheel->SetMode(ON);
+        gy_input = (double) sensor.getGyro().y;
+        reactionWheel->Compute();
+        float output = bldc_init + bldc_output;
+        output = output > 180 ? 180 : output;
+        output = output < 0 ? 0 : output;
+        bldc.write((int) round(output));
+    } else {
+        reactionWheel->SetMode(0);
+        pid_print.detach();
+    }
+}
+#endif
