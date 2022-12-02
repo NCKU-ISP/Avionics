@@ -13,6 +13,7 @@
 #include <Arduino.h>
 #include <Ticker.h>
 #include <WIFI_comms.h>
+#include <config.h>
 #include <logger.h>
 #include <sensors.h>
 #include "../../include/configs.h"
@@ -41,7 +42,7 @@ enum ROCKET_STATE {
 };
 enum FAIRING_TYPE { F_SERVO, F_TRIGGER };
 enum COMMS_STATE { WIFI_DISCONNECTED, WIFI_CONNECTED };
-enum BOARD_TYPE { G_STATION, G_IGNITOR, O_AVIONICS};
+enum BOARD_TYPE { G_STATION, G_IGNITOR, O_AVIONICS };
 typedef struct rocket_status {
     ROCKET_STATE state;
     bool fairingOpened;
@@ -94,6 +95,7 @@ private:
     int count_down_time = 10;
 
     void OTA_init();
+    void load_config();
 
 #ifdef ENGINE_LOADING_TEST
     HX711 loadcell;
@@ -107,6 +109,7 @@ public:
                         .buzzState = BUZ_LEVEL1};
     Logger logger;
     SENSOR sensor;
+    Config config;
 #ifdef USE_WIFI_COMMUNICATION
     wifiServer comms;
 #endif
