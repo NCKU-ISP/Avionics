@@ -41,6 +41,10 @@ System::System()
     pinMode(PIN_TRIGGER_1, OUTPUT);
     digitalWrite(PIN_TRIGGER_1, LOW);
 #endif
+#ifdef PARACHUTE_TRIGGER_2
+    pinMode(PIN_TRIGGER_1, OUTPUT);
+    digitalWrite(PIN_TRIGGER_1, LOW);
+#endif
 
 #ifdef USE_SERVO_CONTROL
     servo[0].attach(PIN_SERVO_1);
@@ -55,6 +59,7 @@ void System::load_config()
     config.read();
     release_t = config.config.rtime;
     stop_t = config.config.stime;
+#ifdef DE_SPIN_CONTROL    
     kp = config.config.kp;
     ki = config.config.ki;
     kd = config.config.kd;
@@ -62,6 +67,7 @@ void System::load_config()
     bldc_init = config.config.bldc_init;
     reactionWheel->SetTunings(kp, ki, kd);
     reactionWheel->SetOutputLimits(0, config.config.speed_limit);
+#endif
 }
 
 SYSTEM_STATE System::init(bool soft_init)
@@ -240,8 +246,10 @@ void System::loop()
         }
     }
     if (core_cmd != "") {
+        auto cmd = core_cmd;
         command(core_cmd, CMD_BOTH);
-        core_cmd = "";
+        if (cmd == core_cmd)
+            core_cmd = "";
     }
 #ifdef USE_ESPNOW_COMMUNICATION
     char *esp_now_msg = fetchESPNOWMessage();
@@ -463,6 +471,9 @@ bool System::command(String cmd, CMD_TYPE type)
 
     // Preflight command
     else if (cmd == "preLaunch" && rocket.state == ROCKET_READY) {
+#ifdef DE_SPIN_CONTROL
+        core_cmd = "bldc" + String(bldc_init);
+#endif
         rocket.state = ROCKET_PREFLIGHT;
 #ifdef USE_PERIPHERAL_BUZZER
         buzzer.attach(0.5, [=]() {
@@ -513,6 +524,7 @@ bool System::command(String cmd, CMD_TYPE type)
         fly_plan.detach();
         log.detach();
         wait_log = false;
+        core_cmd = "0";
     }
 
     // Time command
@@ -635,6 +647,7 @@ bool System::command(String cmd, CMD_TYPE type)
             msg += "Writing...\n";
         }
         load_config();
+#ifdef DE_SPIN_CONTROL
         msg += String("Config:\n") + "rtime:" + (int) release_t + "\n" +
                "stime:" + (int) stop_t + "\n" +
                "PID:" + String(PID_ON ? "ON" : "OFF") + ",kp:" + kp +
@@ -642,7 +655,7 @@ bool System::command(String cmd, CMD_TYPE type)
                ",output:" + bldc_output + ",target:" + gy_target +
                "\nbldc_init:" + bldc_init +
                "\nspeed_limit:" + config.config.speed_limit;
-        ;
+#endif
     }
 #ifdef DE_SPIN_CONTROL
     // Set kp gain
@@ -665,12 +678,7 @@ bool System::command(String cmd, CMD_TYPE type)
     // Turn on/off pid control
     else if (cmd == "pid off") {
         PID_ON = false;
-        // pid_print.detach();
     } else if (cmd == "pid on") {
-        // pid_print.attach_ms(50, [=]() {
-        //     String payload = "in:" + String(gy_input) + ",out:" +
-        //     bldc_output; comms.wifi_broadcast(payload);
-        // });
         PID_ON = true;
     }
 
@@ -736,6 +744,10 @@ void System::flight()
                         core_cmd = "stop";
                     });
                 });
+
+                react_wheel.once_ms(PID_ON_TIME, [=]() {
+                    PID_ON = true;
+                });
             }
         }
 
@@ -750,6 +762,15 @@ void System::flight()
             // fairingOpened(openAngle);
             core_cmd = "open";
         }
+
+#ifdef PARACHUTE_TRIGGER_2
+        if (rocket.fairingOpened) {
+            static auto time = millis();
+            if (millis() - time > CHUTE_DELAY_TIME) {
+                trig(PIN_TRIGGER_1, true);
+            }
+        }
+#endif
     } else {
         data_head = 's';
         T_plus = 0;
@@ -773,7 +794,7 @@ comms.dB +*/
     }
     if (wait_log) {
         logger.log(data_str, LEVEL_FLIGHT);
-        // logger.log_data(data, sizeof(data), LEVEL_FLIGHT);
+        logger.log_data(data, sizeof(data), LEVEL_FLIGHT);
         wait_log = false;
     }
     if (wait_stream) {
@@ -832,7 +853,6 @@ void System::deSpinControl(bool ON)
         bldc.write((int) round(output));
     } else {
         reactionWheel->SetMode(0);
-        pid_print.detach();
     }
 }
 #endif

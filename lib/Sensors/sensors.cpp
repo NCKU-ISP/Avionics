@@ -43,26 +43,26 @@ bool SENSOR::init_imu()
 
 void SENSOR::calibrate_imu()
 {
-    acc_bias.x = 0.481620016135836;
-    acc_bias.y = 0.342010466830107;
-    acc_bias.z = -0.140797227553077;
-    acc_scale.x = 0.999321184282955;
-    acc_scale.y = 1.00502079325252;
-    acc_scale.z = 0.995680172528931;
+    acc_bias.x = -0.860074596209512;
+    acc_bias.y = 0.564012365432969;
+    acc_bias.z = -0.361847527404810;
+    acc_scale.x[0] = 1;
+    acc_scale.y[1] = 1;
+    acc_scale.z[2] = 1;
 
-    gyro_bias.x = -7.63314044250000;
-    gyro_bias.y = -1.11030489300000;
-    gyro_bias.z = -3.81207332550001;
-    gyro_scale.x = 1;
-    gyro_scale.y = 1;
-    gyro_scale.z = 1;
+    gyro_bias.x = 1.73148552545455;
+    gyro_bias.y = -8.10166300181818;
+    gyro_bias.z = -0.481818283636363;
+    gyro_scale.x[0] = 1;
+    gyro_scale.y[1] = 1;
+    gyro_scale.z[2] = 1;
 
-    mag_bias.x = 54.4470230785505;
-    mag_bias.y = 55.7092688360328;
-    mag_bias.z = -23.9733015260566;
-    mag_scale.x = 1;
-    mag_scale.y = 1;
-    mag_scale.z = 1;
+    mag_bias.x = 10.4676080781045;
+    mag_bias.y = -16.9849707443832;
+    mag_bias.z = 30.4808741720844;
+    mag_scale.x[0] = 1;
+    mag_scale.y[1] = 1;
+    mag_scale.z[2] = 1;
 }
 
 bool SENSOR::init_bmp()
@@ -161,15 +161,44 @@ void SENSOR::update_imu()
     // Update the imu data
     imu.update(UPDATE_ACCEL | UPDATE_GYRO | UPDATE_COMPASS);
 
-    acc.x = acc_scale.x * imu.calcAccel(imu.ax) - acc_bias.x;
-    acc.y = acc_scale.y * imu.calcAccel(imu.ay) - acc_bias.y;
-    acc.z = acc_scale.z * imu.calcAccel(imu.az) - acc_bias.z;
-    gyro.x = gyro_scale.x * imu.calcGyro(imu.gx) - gyro_bias.x;
-    gyro.y = gyro_scale.y * imu.calcGyro(imu.gy) - gyro_bias.y;
-    gyro.z = gyro_scale.z * imu.calcGyro(imu.gz) - gyro_bias.z;
-    mag.x = mag_scale.x * imu.calcMag(imu.mx) - mag_bias.x;
-    mag.y = mag_scale.y * imu.calcMag(imu.my) - mag_bias.y;
-    mag.z = mag_scale.z * imu.calcMag(imu.mz) - mag_bias.z;
+    acc.x = acc_scale.x[0] * imu.calcAccel(imu.ax) +
+            acc_scale.x[1] * imu.calcAccel(imu.ay) +
+            acc_scale.x[2] * imu.calcAccel(imu.az) -
+            acc_bias.x;
+    acc.y = acc_scale.y[0] * imu.calcAccel(imu.ax) +
+            acc_scale.y[1] * imu.calcAccel(imu.ay) +
+            acc_scale.y[2] * imu.calcAccel(imu.az) -
+            acc_bias.y;
+    acc.z = acc_scale.z[0] * imu.calcAccel(imu.ax) +
+            acc_scale.z[1] * imu.calcAccel(imu.ay) +
+            acc_scale.z[2] * imu.calcAccel(imu.az) -
+            acc_bias.z;
+            
+    gyro.x = gyro_scale.x[0] * imu.calcGyro(imu.gx) +
+             gyro_scale.x[1] * imu.calcGyro(imu.gy) +
+             gyro_scale.x[2] * imu.calcGyro(imu.gz) -
+             gyro_bias.x;
+    gyro.y = gyro_scale.y[0] * imu.calcGyro(imu.gx) +
+             gyro_scale.y[1] * imu.calcGyro(imu.gy) +
+             gyro_scale.y[2] * imu.calcGyro(imu.gz) -
+             gyro_bias.y;
+    gyro.z = gyro_scale.z[0] * imu.calcGyro(imu.gx) +
+             gyro_scale.z[1] * imu.calcGyro(imu.gy) +
+             gyro_scale.z[2] * imu.calcGyro(imu.gz) -
+             gyro_bias.z;
+
+    mag.x = mag_scale.x[0] * imu.calcMag(imu.mx) +
+            mag_scale.x[1] * imu.calcMag(imu.my) +
+            mag_scale.x[2] * imu.calcMag(imu.mz) -
+            mag_bias.x;
+    mag.y = mag_scale.y[0] * imu.calcMag(imu.mx) +
+            mag_scale.y[1] * imu.calcMag(imu.my) +
+            mag_scale.y[2] * imu.calcMag(imu.mz) -
+            mag_bias.y;
+    mag.z = mag_scale.z[0] * imu.calcMag(imu.mx) +
+            mag_scale.z[1] * imu.calcMag(imu.my) +
+            mag_scale.z[2] * imu.calcMag(imu.mz) -
+            mag_bias.z;
 #endif
 }
 

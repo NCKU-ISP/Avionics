@@ -76,8 +76,7 @@ private:
     Ticker log;
     Ticker stream;
     Ticker count_down;
-    Ticker fire;
-    Ticker pid_print;
+    Ticker react_wheel;
 
     String data = "";
 
@@ -126,8 +125,8 @@ public:
     /* For WiFi communication */
 #ifdef DE_SPIN_CONTROL
     PID *reactionWheel;
-    double gy_input, bldc_output, gy_target, bldc_init;
-    double kp = 1, ki = 1, kd = 0;
+    double gy_input, bldc_output, gy_target, bldc_init = 50;
+    double kp = 0.4, ki = 0.8, kd = 0;
     Servo bldc;
     bool PID_ON;
 #endif

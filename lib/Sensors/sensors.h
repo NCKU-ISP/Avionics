@@ -40,10 +40,15 @@
 #endif
 
 typedef struct fvec {
-    float x;
-    float y;
-    float z;
+    float x = 0;
+    float y = 0;
+    float z = 0;
 } fvec_t;
+typedef struct fmat {
+    float x[3] = {0};
+    float y[3] = {0};
+    float z[3] = {0};
+} fmat_t;
 
 enum ROCKET_POSE { ROCKET_UNKNOWN, ROCKET_RISING, ROCKET_FALLING };
 
@@ -69,7 +74,7 @@ private:
 
 public:
     fvec_t acc, gyro, mag, gps;
-    fvec_t acc_scale, gyro_scale, mag_scale;
+    fmat_t acc_scale, gyro_scale, mag_scale;
     fvec_t acc_bias, gyro_bias, mag_bias;
     float altitude_estimate;
     float velocity_estimate;
