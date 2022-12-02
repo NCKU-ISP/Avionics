@@ -241,9 +241,11 @@ bool wifiServer::wifi_broadcast(const char *payload, bool cleanMsg)
 
 void wifiServer::loop()
 {
+#ifndef USE_ESPNOW_COMMUNICATION
     server.handleClient();  // Loop for server
     webSocket.loop();       // Loop for websocket
     MDNS.update();          // For muiltipule clients to connect
+#endif
 }
 
 #ifdef USE_ESPNOW_COMMUNICATION
