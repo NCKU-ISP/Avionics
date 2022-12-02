@@ -7,7 +7,8 @@ SYSTEM_STATE System::state = SYSTEM_UP;
 
 System::System()
     : logger(),
-      sensor()
+      sensor(),
+      config()
 #ifdef USE_WIFI_COMMUNICATION
       ,
       comms()  // Initialize wifi communication object
@@ -49,6 +50,13 @@ System::System()
 #endif
 }
 
+void System::load_config()
+{
+    config.read();
+    release_t = config.config.rtime;
+    stop_t = config.config.stime;
+}
+
 SYSTEM_STATE System::init(bool soft_init)
 {
     rocket = {.state = ROCKET_READY,
@@ -86,7 +94,8 @@ SYSTEM_STATE System::init(bool soft_init)
     if (sensor.init() != ERROR_OK) {
         // logger.log_code(ERROR_SENSOR_INIT_FAILED, LEVEL_ERROR);
         // buzzer(BUZ_LEVEL0);
-        String error_msg = String("[") + rocket.btype + "] ERROR_SENSOR_INIT_FAILED" + LEVEL_ERROR;
+        String error_msg = String("[") + rocket.btype +
+                           "] ERROR_SENSOR_INIT_FAILED" + LEVEL_ERROR;
         comms.wifi_broadcast(error_msg);
         Serial.println(error_msg);
 #ifdef USE_PERIPHERAL_BUZZER
@@ -94,7 +103,8 @@ SYSTEM_STATE System::init(bool soft_init)
 #endif
     } else {
         Serial.println("Sensor initialized success");
-        comms.wifi_broadcast(String("[") + rocket.btype + "] Sensor initialized success\n");
+        comms.wifi_broadcast(String("[") + rocket.btype +
+                             "] Sensor initialized success\n");
     }
     // // logger.log_info(INFO_IMU_INIT);
     // // logger.log_code(INFO_IMU_INIT, LEVEL_INFO);
@@ -141,11 +151,14 @@ SYSTEM_STATE System::init(bool soft_init)
     gy_input = 0;
     bldc_output = 0;
     gy_target = 0;
-    reactionWheel = new PID(&gy_input, &bldc_output, &gy_target, ki, kp, kd, P_ON_M, REVERSE);
+    reactionWheel = new PID(&gy_input, &bldc_output, &gy_target, ki, kp, kd,
+                            P_ON_M, REVERSE);
     reactionWheel->SetOutputLimits(0, 60);
     PID_ON = false;
     reactionWheel->SetMode(PID_ON);
 #endif
+
+    load_config();
 
     return SYSTEM_READY;
 }
@@ -211,7 +224,8 @@ void System::loop()
         } else {
 #ifdef GROUND_STATION
             serial_cmd += "\n";
-            comms.wifi_broadcast(String("[") + rocket.btype + "] " + serial_cmd);
+            comms.wifi_broadcast(String("[") + rocket.btype + "] " +
+                                 serial_cmd);
 #else
             keep = command(serial_cmd, CMD_SERIAL);
 #endif
@@ -233,7 +247,7 @@ void System::loop()
 #else
         Serial.printf("Fetch: %s\n", esp_now_msg);
         esp_now_msg[strlen(esp_now_msg) - 1] = 0;
-        command(esp_now_msg+4, CMD_BOTH);
+        command(esp_now_msg + 4, CMD_BOTH);
 #endif
         clearESPNOWMessage();
     }
@@ -415,7 +429,8 @@ bool System::command(String cmd, CMD_TYPE type)
         fairing(closeAngle);
         msg = "close fairingOpened done";
     } else if (cmd.substring(0, 11) == "set fairingOpened") {
-        // cmd:set fairingOpened (open angle) (close angle), ex: set fairingOpened 10 100
+        // cmd:set fairingOpened (open angle) (close angle), ex: set
+        // fairingOpened 10 100
         String degree = cmd.substring(12);
         int open = degree.substring(0, degree.indexOf(' ')).toInt();
         int close = degree.substring(degree.indexOf(' ')).toInt();
@@ -558,7 +573,8 @@ bool System::command(String cmd, CMD_TYPE type)
 
     else if (cmd == "rocket") {
         msg += "state: " + String(rocket.state) + '\n';
-        msg += "fairingOpened: " + String(rocket.fairingOpened ? "open" : "closed") + "\n";
+        msg += "fairingOpened: " +
+               String(rocket.fairingOpened ? "open" : "closed") + "\n";
         msg += "fairingOpened type: " +
                String((rocket.ftype == F_TRIGGER) ? "trigger" : "servo") + "\n";
         msg += "comms state: " + String(rocket.cState) + "\n";
@@ -590,14 +606,26 @@ bool System::command(String cmd, CMD_TYPE type)
     else if (cmd == "init") {
         init(false);
         msg = "soft init";
+    } else if (cmd.substring(0, 6) == "config") {
+        msg = "";
+        if (cmd.substring(7, 10) == "set") {
+            if (cmd.substring(11, 16) == "rtime")
+                config.config.rtime = cmd.substring(16).toInt();
+            else if (cmd.substring(11, 16) == "stime")
+                config.config.stime = cmd.substring(16).toInt();
+            config.write();
+            msg += "Writing...\n";
+        }
+        load_config();
+        msg += String("Config:\n") + "rtime:" + (int) config.config.rtime +
+               "\n" + "stime:" + (int) config.config.stime;
     }
-
 #ifdef DE_SPIN_CONTROL
     // Show the pid status and gain
     else if (cmd == "pid") {
-        msg = "PID:" + String(PID_ON ? "ON" : "OFF") +
-              ",kp:" + kp + ",ki:" + ki + ",kd:" + kd + 
-              "\ninput:" + gy_input + ",output:" + bldc_output + ",target:" + gy_target +
+        msg = "PID:" + String(PID_ON ? "ON" : "OFF") + ",kp:" + kp +
+              ",ki:" + ki + ",kd:" + kd + "\ninput:" + gy_input +
+              ",output:" + bldc_output + ",target:" + gy_target +
               "\nbldc_init:" + bldc_init;
     }
     // Set kp gain
@@ -614,8 +642,7 @@ bool System::command(String cmd, CMD_TYPE type)
     else if (cmd.substring(0, 2) == "kd") {
         kd = cmd.substring(2).toDouble();
         reactionWheel->SetTunings(kp, ki, kd);
-    }
-    else if (cmd.substring(0, 9) == "bldc_init") {
+    } else if (cmd.substring(0, 9) == "bldc_init") {
         bldc_init = cmd.substring(9).toDouble();
     }
     // Turn on/off pid control
@@ -624,13 +651,13 @@ bool System::command(String cmd, CMD_TYPE type)
         // pid_print.detach();
     } else if (cmd == "pid on") {
         // pid_print.attach_ms(50, [=]() {
-        //     String payload = "in:" + String(gy_input) + ",out:" + bldc_output;
-        //     comms.wifi_broadcast(payload);
+        //     String payload = "in:" + String(gy_input) + ",out:" +
+        //     bldc_output; comms.wifi_broadcast(payload);
         // });
         PID_ON = true;
     }
 
-    else if (cmd.substring(0,4) == "bldc") {
+    else if (cmd.substring(0, 4) == "bldc") {
         if (PID_ON) {
             msg = "Unable to change motor speed while pid is on.";
         } else {
@@ -651,9 +678,11 @@ bool System::command(String cmd, CMD_TYPE type)
         if (type == CMD_SERIAL || type == CMD_BOTH)
             Serial.print(msg);
         if (type == CMD_WIFI)
-            comms.wifi_broadcast(String("[") + rocket.btype + "] " + msg, !keep);
+            comms.wifi_broadcast(String("[") + rocket.btype + "] " + msg,
+                                 !keep);
         if (type == CMD_BOTH)
-            comms.wifi_broadcast(String("[") + rocket.btype + "] " + msg, false);
+            comms.wifi_broadcast(String("[") + rocket.btype + "] " + msg,
+                                 false);
     }
 
     return keep;
@@ -662,7 +691,7 @@ bool System::command(String cmd, CMD_TYPE type)
 
 void System::flight()
 {
-    float height = 0, speed = 0, height_est;
+    float height = 0, speed = 0, height_est = 0;
     uint8_t data[53];
     String data_str;
     char data_head;
@@ -673,24 +702,23 @@ void System::flight()
 #endif
     static unsigned long T_start = -1;
     unsigned long T_plus;
-    if (rocket.state == ROCKET_OFFGROUND)
-    {
-        if(!rocket.liftoff)
-        {
-            float ACC = sqrt(pow(sensor.acc.x,2) + pow(sensor.acc.y,2) + pow(sensor.acc.z,2));
+    if (rocket.state == ROCKET_OFFGROUND) {
+        if (!rocket.liftoff) {
+            float ACC = sqrt(pow(sensor.acc.x, 2) + pow(sensor.acc.y, 2) +
+                             pow(sensor.acc.z, 2));
             Serial.println(ACC);
-            if(ACC > IMU_LIFT_OFF_DETECTION_G) {
+            if (ACC > IMU_LIFT_OFF_DETECTION_G) {
                 Serial.println("Lift off");
                 comms.wifi_broadcast("Lift off");
                 rocket.liftoff = true;
-                fly_plan.once_ms(release_t, [=]()
-                                 {
-                                     core_cmd = "open";
-                                     fly_plan.detach();
-                                     fly_plan.once_ms(stop_t, [=]() {
-                                         rocket.buzzState = buzz(BUZ_LEVEL3);
-                                         core_cmd = "stop";
-                                     }); });
+                fly_plan.once_ms(release_t, [=]() {
+                    core_cmd = "open";
+                    fly_plan.detach();
+                    fly_plan.once_ms(stop_t, [=]() {
+                        rocket.buzzState = buzz(BUZ_LEVEL3);
+                        core_cmd = "stop";
+                    });
+                });
             }
         }
 
@@ -701,50 +729,43 @@ void System::flight()
         data_head = 'f';
 
         if (sensor.pose == ROCKET_FALLING && !rocket.fairingOpened &&
-            T_plus > LIFT_OFF_PROTECT_TIME && rocket.liftoff)
-        {
+            T_plus > LIFT_OFF_PROTECT_TIME && rocket.liftoff) {
             // fairingOpened(openAngle);
             core_cmd = "open";
         }
-    }
-    else
-    {
+    } else {
         data_head = 's';
         T_plus = 0;
     }
 
-    if (rocket.state == ROCKET_LANDED)
-    {
+    if (rocket.state == ROCKET_LANDED) {
         T_start = -1;
     }
 
-    if (wait_log || wait_stream)
-    {
+    if (wait_log || wait_stream) {
         comms.dB = 0;
-        data_str = String(data_head) + ',' + T_plus + ',' +
-                   height + ',' + height_est + ',' + speed + ',' +
-                   sensor.acc.x + ',' + sensor.acc.y + ',' + sensor.acc.z + ',' +
-                   sensor.gyro.x + ',' + sensor.gyro.y + ',' + sensor.gyro.z + ',' +
-                   sensor.mag.x + ',' + sensor.mag.y + ',' + sensor.mag.z + /*',' +
-                   sensor.gps.x + sensor.gps.y + ',' + sensor.gps.z + ',' +
-                   comms.dB +*/
+        data_str = String(data_head) + ',' + T_plus + ',' + height + ',' +
+                   height_est + ',' + speed + ',' + sensor.acc.x + ',' +
+                   sensor.acc.y + ',' + sensor.acc.z + ',' + sensor.gyro.x +
+                   ',' + sensor.gyro.y + ',' + sensor.gyro.z + ',' +
+                   sensor.mag.x + ',' + sensor.mag.y + ',' +
+                   sensor.mag.z + /*','
++ sensor.gps.x + sensor.gps.y + ',' + sensor.gps.z + ',' +
+comms.dB +*/
                    '\n';
     }
-    if (wait_log)
-    {
+    if (wait_log) {
         logger.log(data_str, LEVEL_FLIGHT);
         // logger.log_data(data, sizeof(data), LEVEL_FLIGHT);
         wait_log = false;
     }
-    if (wait_stream)
-    {
+    if (wait_stream) {
         comms.wifi_broadcast(data_str, false);
         // comms.webSocket.broadcastBIN(data, sizeof(data));
         wait_stream = false;
     }
 
-    if (speed < -12 && height < 10)
-    {
+    if (speed < -12 && height < 10) {
         core_cmd = "stop";
     }
 }
@@ -784,7 +805,7 @@ void System::loading_test(String *command)
 #ifdef DE_SPIN_CONTROL
 void System::deSpinControl(bool ON)
 {
-    if(ON) {
+    if (ON) {
         reactionWheel->SetMode(ON);
         gy_input = (double) sensor.getGyro().y;
         reactionWheel->Compute();
