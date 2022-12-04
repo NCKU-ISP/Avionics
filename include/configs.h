@@ -31,6 +31,7 @@
 #define USE_GY91_MPU9250
 #define USE_PERIPHERAL_BUZZER
 #define PARACHUTE_TRIGGER
+#define PARACHUTE_TRIGGER_2
 #define DE_SPIN_CONTROL
 // #define PARACHUTE_SERVO
 #elif defined(GROUND_IGNITOR)
@@ -105,6 +106,9 @@
 #elif defined(PARACHUTE_SERVO)
 #define PIN_MOTOR 13
 #endif
+#ifdef PARACHUTE_TRIGGER_2
+#define PIN_TRIGGER_1 12
+#endif
 
 #ifdef USE_PERIPHERAL_BUZZER
 #define BUZ_ON_LEVEL 0  // Buzzer buzz on high or low
@@ -170,8 +174,12 @@
 #define SERVO_RELEASE_ANGLE 150
 #endif
 #define release_by_time
-#define RELEASE_TIME 8000
-#define STOP_TIME 45000
+#ifdef PARACHUTE_TRIGGER_2
+#define CHUTE_DELAY_TIME 1000
+#endif
+#define RELEASE_TIME 12000
+#define STOP_TIME 55000
+#define PID_ON_TIME 4000
 
 /*------------------ Constants for imu ------------------*/
 #ifdef USE_PERIPHERAL_MPU6050
@@ -253,8 +261,7 @@ enum INFO_CODE {
     INFO_LORA_INIT
 };
 
-#define LIFT_OFF_PROTECT_TIME 3000
-#define IMU_FALLING_CRITERIA -0.4f
+#define LIFT_OFF_PROTECT_TIME 1000
 #define IMU_LIFT_OFF_DETECTION_G 2.5f
 
 #endif
