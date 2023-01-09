@@ -1,3 +1,2 @@
 (sym_lib_table
-  (lib (name "IP5306")(type "Legacy")(uri "${KIPRJMOD}/IP5306/IP5306.lib")(options "")(descr ""))
 )
