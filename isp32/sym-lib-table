@@ -1,3 +1,4 @@
 (sym_lib_table
   (lib (name "KSSG33J12-3")(type "KiCad")(uri "${KIPRJMOD}/Buzzer/KSSG33J12-3.kicad_sym")(options "")(descr ""))
+  (lib (name "STM32G030J6M6")(type "KiCad")(uri "${KIPRJMOD}/STM32G030J6/STM32G030J6M6.kicad_sym")(options "")(descr ""))
 )

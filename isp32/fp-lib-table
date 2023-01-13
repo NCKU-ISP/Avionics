@@ -1,4 +1,5 @@
 (fp_lib_table
   (lib (name "isp_logo")(type "KiCad")(uri "${KIPRJMOD}/LOGO/isp_logo.pretty")(options "")(descr ""))
   (lib (name "Buzzer")(type "KiCad")(uri "${KIPRJMOD}/Buzzer")(options "")(descr ""))
+  (lib (name "STM32G030J6")(type "KiCad")(uri "${KIPRJMOD}/STM32G030J6")(options "")(descr ""))
 )
