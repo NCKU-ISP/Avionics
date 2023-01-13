@@ -2,4 +2,5 @@
   (lib (name "isp_logo")(type "KiCad")(uri "${KIPRJMOD}/LOGO/isp_logo.pretty")(options "")(descr ""))
   (lib (name "Buzzer")(type "KiCad")(uri "${KIPRJMOD}/Buzzer")(options "")(descr ""))
   (lib (name "STM32G030J6")(type "KiCad")(uri "${KIPRJMOD}/STM32G030J6")(options "")(descr ""))
+  (lib (name "ESP32-S3-WROOM-1U")(type "KiCad")(uri "${KIPRJMOD}/ESP32-S3-WROOM-1U")(options "")(descr ""))
 )
