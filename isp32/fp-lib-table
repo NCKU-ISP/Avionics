@@ -3,4 +3,6 @@
   (lib (name "Buzzer")(type "KiCad")(uri "${KIPRJMOD}/Buzzer")(options "")(descr ""))
   (lib (name "STM32G030J6")(type "KiCad")(uri "${KIPRJMOD}/STM32G030J6")(options "")(descr ""))
   (lib (name "ESP32-S3-WROOM-1U")(type "KiCad")(uri "${KIPRJMOD}/ESP32-S3-WROOM-1U")(options "")(descr ""))
+  (lib (name "SC189Z")(type "KiCad")(uri "${KIPRJMOD}/SC189Z")(options "")(descr ""))
+  (lib (name "MP1660GTF-Z")(type "KiCad")(uri "${KIPRJMOD}/MP1660GTF-Z")(options "")(descr ""))
 )
