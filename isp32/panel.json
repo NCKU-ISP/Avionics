@@ -1,0 +1,15 @@
+{
+    "layout": {
+        "rows": "2"
+    },
+    "cuts": {
+        "type": "vcuts",
+        "layer": "Edge.Cuts"
+    },
+    "framing": {
+        "type": "railslr"
+    },
+    "copperfill": {
+        "type": "solid"
+    }
+}
