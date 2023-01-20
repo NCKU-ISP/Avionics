@@ -1,0 +1,7 @@
+(sym_lib_table
+  (lib (name "KSSG33J12-3")(type "KiCad")(uri "${KIPRJMOD}/Buzzer/KSSG33J12-3.kicad_sym")(options "")(descr ""))
+  (lib (name "ESP32-S3-WROOM-1U")(type "KiCad")(uri "${KIPRJMOD}/ESP32-S3-WROOM-1U/ESP32-S3-WROOM-1U.kicad_sym")(options "")(descr ""))
+  (lib (name "MP1660GTF-Z")(type "KiCad")(uri "${KIPRJMOD}/MP1660GTF-Z/MP1660GTF-Z.kicad_sym")(options "")(descr ""))
+  (lib (name "SC189ZSKTRT")(type "KiCad")(uri "${KIPRJMOD}/SC189Z/SC189ZSKTRT.kicad_sym")(options "")(descr ""))
+  (lib (name "STM32G030F6")(type "KiCad")(uri "${KIPRJMOD}/STM32G030F6/STM32G030F6.kicad_sym")(options "")(descr ""))
+)
