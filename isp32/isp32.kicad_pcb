@@ -4500,15 +4500,10 @@
       (net 2 "GND") (pinfunction "SHIELD") (pintype "passive") (tstamp b1750af3-9811-4616-a124-02e8eea967c6))
     (pad "S1" thru_hole oval (at 4.32 2.24) (size 1.7 0.9) (drill oval 1.4 0.6) (layers *.Cu *.Mask)
       (net 2 "GND") (pinfunction "SHIELD") (pintype "passive") (tstamp ef3351c9-9247-49ce-9cbe-3bcb8993ac02))
-    (model "${KICAD6_3DMODEL_DIR}/Connector_USB.3dshapes/USB_C_Receptacle_Palconn_UTC16-G.wrl"
-      (offset (xyz 0 0 0))
+    (model "${KICAD6_3DMODEL_DIR}/Connector_USB.3dshapes/USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal.wrl"
+      (offset (xyz 0 -1.27 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
-    )
-    (model "${KIPRJMOD}/3D Model/CSP-USC16-TR--3DModel-STEP-468060.STEP"
-      (offset (xyz 0 1.5 0))
-      (scale (xyz 1 1 1))
-      (rotate (xyz -90 0 0))
     )
   )
 
@@ -6183,6 +6178,11 @@
     (pad "2" smd rect locked (at 1.85 0 90) (size 1.4 4.2) (layers "B.Cu" "B.Paste" "B.Mask")
       (net 1 "+5V") (pintype "passive") (tstamp 5778395e-a10a-4de9-92c1-249629e3b7a5))
     (model "${KICAD6_3DMODEL_DIR}/Inductor_SMD.3dshapes/L_Sunlord_SWPA5020S.wrl"
+      (offset (xyz 0 0 0))
+      (scale (xyz 1 1 1))
+      (rotate (xyz 0 0 0))
+    )
+    (model "${KICAD6_3DMODEL_DIR}/Inductor_SMD.3dshapes/L_TDK_SLF6025.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
