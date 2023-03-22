@@ -372,7 +372,7 @@
         "name": "Default",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.22,
+        "track_width": 0.2,
         "via_diameter": 0.4,
         "via_drill": 0.2,
         "wire_width": 6.0
@@ -385,12 +385,12 @@
   },
   "pcbnew": {
     "last_paths": {
-      "gencad": "",
+      "gencad": "isp32.cad",
       "idf": "",
       "netlist": "../../../../../Applications/KiCad/KiCad.app/Contents/Applications/",
       "specctra_dsn": "../../../isp32.dsn",
-      "step": "",
-      "vrml": ""
+      "step": "isp32.step",
+      "vrml": "isp32.wrl"
     },
     "page_layout_descr_file": ""
   },
