@@ -1,10 +1,17 @@
 {
     "layout": {
+        "hbackbone": "2mm",
         "rows": "2"
     },
+    "source": {
+        "tolerance": "2mm"
+    },
+    "tabs": {
+        "type": "full"
+    },
     "cuts": {
-        "type": "vcuts",
-        "layer": "Edge.Cuts"
+        "type": "mousebites",
+        "offset": "-0.5mm"
     },
     "framing": {
         "type": "railslr"
