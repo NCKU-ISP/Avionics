@@ -1,0 +1,3 @@
+[submodule "ispF1/Kicad-assets"]
+	path = ispF1/Kicad-assets
+	url = https://github.com/rabid-inventor/Kicad-assets.git
